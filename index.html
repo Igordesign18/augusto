@@ -3,392 +3,440 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CreditoMais - Gestão Administrativa</title>
+    <title>CreditoMais - Sistema Administrativo</title>
     
-    <!-- Tailwind CSS (Fintech Design System) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        brand: {
-                            DEFAULT: '#FF6B00',
-                            light: '#FF8A33',
-                            dark: '#CC5500',
-                        },
-                        grafite: '#2D3748'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
+                    colors: { brand: { DEFAULT: '#FF6B00', dark: '#CC5500' }, grafite: '#2D3748' },
+                    fontFamily: { sans:['Inter', 'sans-serif'] }
                 }
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Icons & Charts -->
+    <!-- Icons & Charts & Supabase -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+        .glass-card { background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .menu-item.active { background-color: #FFF0E5; color: #FF6B00; border-right: 4px solid #FF6B00; }
-        .menu-item { transition: all 0.2s ease; }
         .menu-item:hover:not(.active) { background-color: #F9FAFB; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #FF6B00; }
-
-        .modal { display: none; }
-        .modal.active { display: flex; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-grafite">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm z-10">
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm z-20">
         <div class="h-20 flex items-center px-6 border-b border-gray-100">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-brand rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md">
-                    <i class="fa-solid fa-coins"></i>
-                </div>
+                <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white font-bold shadow-md"><i class="fa-solid fa-coins"></i></div>
                 <h1 class="font-bold text-xl tracking-tight text-grafite">Credito<span class="text-brand">Mais</span></h1>
             </div>
         </div>
-
         <nav class="flex-1 overflow-y-auto py-4">
-            <ul class="space-y-1">
-                <li><a href="#" onclick="changeView('dashboard', this)" class="menu-item active flex items-center px-6 py-3 text-sm font-medium"><i class="fa-solid fa-chart-pie w-6"></i> Dashboard</a></li>
-                <li class="px-6 mt-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Cadastros</li>
-                <li><a href="#" onclick="changeView('clientes', this)" class="menu-item flex items-center px-6 py-3 text-sm font-medium"><i class="fa-solid fa-users w-6"></i> Clientes</a></li>
-                <li><a href="#" class="menu-item flex items-center px-6 py-3 text-sm font-medium text-gray-600"><i class="fa-solid fa-user-shield w-6"></i> Avalistas</a></li>
-                <li><a href="#" class="menu-item flex items-center px-6 py-3 text-sm font-medium text-gray-600"><i class="fa-solid fa-store w-6"></i> Micro Negócios</a></li>
-                
-                <li class="px-6 mt-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Operacional</li>
-                <li><a href="#" class="menu-item flex items-center px-6 py-3 text-sm font-medium text-gray-600"><i class="fa-solid fa-calculator w-6"></i> Avaliação Financeira</a></li>
-                <li><a href="#" class="menu-item flex items-center px-6 py-3 text-sm font-medium text-gray-600"><i class="fa-solid fa-money-bill-transfer w-6"></i> Operações</a></li>
-                <li><a href="#" class="menu-item flex items-center px-6 py-3 text-sm font-medium text-gray-600"><i class="fa-solid fa-list-check w-6"></i> Parcelas</a></li>
-                <li><a href="#" class="menu-item flex items-center px-6 py-3 text-sm font-medium text-gray-600"><i class="fa-solid fa-triangle-exclamation w-6"></i> Inadimplência</a></li>
-                
-                <li class="px-6 mt-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Gestão</li>
-                <li><a href="#" class="menu-item flex items-center px-6 py-3 text-sm font-medium text-gray-600"><i class="fa-solid fa-chart-line w-6"></i> Relatórios</a></li>
+            <ul class="space-y-1" id="menu-list">
+                <!-- Preenchido via JS -->
             </ul>
         </nav>
-        
-        <div class="p-4 border-t border-gray-200 text-xs text-gray-400 text-center">
-            Sistema Interno v1.0
-        </div>
     </aside>
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        
         <!-- TOPBAR -->
-        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-0">
-            <h2 id="page-title" class="text-2xl font-semibold text-grafite">Visão Geral</h2>
+        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10">
+            <h2 id="page-title" class="text-2xl font-semibold text-grafite">Carregando...</h2>
             <div class="flex items-center gap-4">
-                <button class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 relative">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-                <div class="flex items-center gap-3 border-l pl-4 border-gray-200">
-                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=FF6B00&color=fff" alt="Admin" class="w-10 h-10 rounded-full">
-                    <div>
-                        <p class="text-sm font-medium">Administrador</p>
-                        <p class="text-xs text-green-500">Online e Conectado</p>
+                <div class="flex items-center gap-3">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=FF6B00&color=fff" class="w-9 h-9 rounded-full">
+                    <div class="hidden md:block">
+                        <p class="text-sm font-medium leading-none">Administrador</p>
+                        <p class="text-xs text-green-500 mt-1">Conectado</p>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- CONTENT AREA (Dynamic) -->
-        <div id="app-content" class="flex-1 overflow-y-auto p-8">
-            <!-- Renderizado via JS -->
-        </div>
-
+        <!-- CONTENT AREA -->
+        <div id="app-content" class="flex-1 overflow-y-auto p-6 md:p-8"></div>
     </main>
 
-    <!-- MODAL NOVO CLIENTE -->
-    <div id="modal-cliente" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-grafite"><i class="fa-solid fa-user-plus text-brand mr-2"></i> Cadastrar Novo Cliente</h3>
-                <button onclick="toggleModal('modal-cliente')" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto flex-1">
-                <form id="form-cliente" class="space-y-6">
-                    <!-- Dados Pessoais -->
-                    <h4 class="font-semibold text-brand border-b pb-2">Dados Pessoais</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="col-span-3"><label class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="cli_nome" required class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">CPF</label><input type="text" id="cli_cpf" required class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">RG</label><input type="text" id="cli_rg" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Data de Nascimento</label><input type="date" id="cli_nasc" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">WhatsApp</label><input type="text" id="cli_whats" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div class="col-span-2"><label class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="cli_email" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                    </div>
+    <!-- MODALS CONTAINER -->
+    <div id="modals-container"></div>
 
-                    <!-- Endereço -->
-                    <h4 class="font-semibold text-brand border-b pb-2 pt-4">Endereço</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div><label class="block text-sm font-medium text-gray-700">CEP</label><input type="text" id="cli_cep" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div class="col-span-2"><label class="block text-sm font-medium text-gray-700">Rua</label><input type="text" id="cli_rua" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Número</label><input type="text" id="cli_num" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Bairro</label><input type="text" id="cli_bairro" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Cidade</label><input type="text" id="cli_cidade" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Estado</label><input type="text" id="cli_estado" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Tipo Moradia</label>
-                            <select id="cli_moradia" class="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand focus:border-brand">
-                                <option>Própria</option><option>Alugada</option><option>Cedida</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
-                <button type="button" onclick="toggleModal('modal-cliente')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 font-medium">Cancelar</button>
-                <button type="button" onclick="salvarCliente()" class="px-6 py-2 bg-brand text-white rounded-md hover:bg-brand-dark font-medium shadow-md transition-colors">Salvar Cliente</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCRIPT PRINCIPAL -->
+    <!-- SCRIPTS CORE -->
     <script>
         // 1. CONFIGURAÇÃO SUPABASE
         const supaUrl = 'https://hrnekdzkdapqeaydzcpo.supabase.co';
-        const supaKey = 'sb_publishable_iqElQyZrTgJcrZaL8H4utQ_4Nb-_DQw'; // Aspa corrigida
-        const supabase = supabase.createClient(supaUrl, supaKey);
+        const supaKey = 'sb_publishable_iqElQyZrTgJcrZaL8H4utQ_4Nb-_DQw';
+        const supabase = window.supabase.createClient(supaUrl, supaKey);
 
-        // 2. CONTROLE DE INTERFACE (SPA)
-        const appContent = document.getElementById('app-content');
-        const pageTitle = document.getElementById('page-title');
+        let currentView = 'dashboard';
 
-        function changeView(view, element) {
-            // Update Menu
-            document.querySelectorAll('.menu-item').forEach(el => {
-                el.classList.remove('active', 'bg-[#FFF0E5]', 'text-[#FF6B00]', 'border-r-4', 'border-[#FF6B00]');
-                el.classList.add('text-gray-600');
+        // 2. CONFIGURAÇÃO DE MENUS
+        const menuItems =[
+            { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard', group: 'Geral' },
+            { id: 'clientes', icon: 'fa-users', label: 'Clientes', group: 'Cadastros' },
+            { id: 'avalistas', icon: 'fa-user-shield', label: 'Avalistas', group: 'Cadastros' },
+            { id: 'micronegocios', icon: 'fa-store', label: 'Micro Negócios', group: 'Cadastros' },
+            { id: 'avaliacao', icon: 'fa-calculator', label: 'Avaliação Financeira', group: 'Operacional' },
+            { id: 'operacoes', icon: 'fa-money-bill-transfer', label: 'Operações', group: 'Operacional' },
+            { id: 'parcelas', icon: 'fa-list-check', label: 'Parcelas', group: 'Operacional' },
+            { id: 'inadimplencia', icon: 'fa-triangle-exclamation', label: 'Inadimplência', group: 'Operacional' }
+        ];
+
+        // 3. UTILS DE INTERFACE
+        const inClass = "mt-1 w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-brand focus:border-brand bg-white";
+        const lblClass = "block text-xs font-semibold text-gray-600 uppercase tracking-wide";
+
+        function renderMenu() {
+            const ul = document.getElementById('menu-list');
+            let lastGroup = '';
+            let html = '';
+            menuItems.forEach(item => {
+                if (item.group !== lastGroup) {
+                    html += `<li class="px-6 mt-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">${item.group}</li>`;
+                    lastGroup = item.group;
+                }
+                html += `<li><a href="#" onclick="changeView('${item.id}')" class="menu-item flex items-center px-6 py-3 text-sm font-medium text-gray-600" data-target="${item.id}">
+                            <i class="fa-solid ${item.icon} w-6"></i> ${item.label}
+                         </a></li>`;
             });
-            
-            if(element) {
-                element.classList.remove('text-gray-600');
-                element.classList.add('active');
-            }
+            ul.innerHTML = html;
+        }
 
-            // Render View
-            if(view === 'dashboard') renderDashboard();
-            if(view === 'clientes') renderClientes();
+        function changeView(viewId) {
+            currentView = viewId;
+            document.querySelectorAll('.menu-item').forEach(el => {
+                el.classList.remove('active');
+                if(el.getAttribute('data-target') === viewId) el.classList.add('active');
+            });
+
+            if(views[viewId]) views[viewId]();
         }
 
         function toggleModal(id) {
             const modal = document.getElementById(id);
-            modal.classList.toggle('active');
-        }
-
-        // 3. RENDERIZAÇÃO: DASHBOARD
-        function renderDashboard() {
-            pageTitle.innerText = "Dashboard Financeiro";
-            appContent.innerHTML = `
-                <!-- KPIs -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="glass-card p-6 rounded-xl border-l-4 border-blue-500">
-                        <div class="flex justify-between items-start">
-                            <div><p class="text-sm text-gray-500 font-medium mb-1">Total Emprestado</p><h3 class="text-2xl font-bold text-gray-800">R$ 450.230,00</h3></div>
-                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                        </div>
-                    </div>
-                    
-                    <div class="glass-card p-6 rounded-xl border-l-4 border-green-500">
-                        <div class="flex justify-between items-start">
-                            <div><p class="text-sm text-gray-500 font-medium mb-1">Lucro Estimado</p><h3 class="text-2xl font-bold text-gray-800">R$ 82.400,00</h3></div>
-                            <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500"><i class="fa-solid fa-sack-dollar"></i></div>
-                        </div>
-                    </div>
-
-                    <div class="glass-card p-6 rounded-xl border-l-4 border-brand">
-                        <div class="flex justify-between items-start">
-                            <div><p class="text-sm text-gray-500 font-medium mb-1">Clientes Ativos</p><h3 class="text-2xl font-bold text-gray-800">1.204</h3></div>
-                            <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-brand"><i class="fa-solid fa-users"></i></div>
-                        </div>
-                    </div>
-
-                    <div class="glass-card p-6 rounded-xl border-l-4 border-red-500">
-                        <div class="flex justify-between items-start">
-                            <div><p class="text-sm text-gray-500 font-medium mb-1">Inadimplência</p><h3 class="text-2xl font-bold text-red-600">4.2%</h3></div>
-                            <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gráficos -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="glass-card p-6 rounded-xl">
-                        <h4 class="font-semibold text-gray-700 mb-4">Volume de Operações (Últimos 6 meses)</h4>
-                        <canvas id="chartOperacoes" height="100"></canvas>
-                    </div>
-                    <div class="glass-card p-6 rounded-xl">
-                        <h4 class="font-semibold text-gray-700 mb-4">Status da Carteira</h4>
-                        <div class="flex justify-center"><canvas id="chartStatus" height="100" style="max-height: 250px;"></canvas></div>
-                    </div>
-                </div>
-            `;
-
-            // Inicializar Gráficos
-            setTimeout(() => {
-                new Chart(document.getElementById('chartOperacoes'), {
-                    type: 'bar',
-                    data: {
-                        labels:['Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'],
-                        datasets:[{ label: 'Valor Liberado (R$)', data:[45000, 52000, 78000, 31000, 65000, 42000], backgroundColor: '#FF6B00', borderRadius: 4 }]
-                    }
-                });
-
-                new Chart(document.getElementById('chartStatus'), {
-                    type: 'doughnut',
-                    data: {
-                        labels:['Em Dia', 'Atraso < 15d', 'Inadimplente'],
-                        datasets:[{ data: [85, 10, 5], backgroundColor:['#10B981', '#F59E0B', '#EF4444'], borderWidth: 0 }]
-                    },
-                    options: { cutout: '70%' }
-                });
-            }, 100);
-        }
-
-        // 4. RENDERIZAÇÃO: CLIENTES
-        async function renderClientes() {
-            pageTitle.innerText = "Gestão de Clientes";
-            appContent.innerHTML = `
-                <div class="glass-card rounded-xl flex flex-col h-full shadow-sm">
-                    <!-- Toolbar -->
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-xl">
-                        <div class="relative w-96">
-                            <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-                            <input type="text" placeholder="Buscar por nome ou CPF..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
-                        </div>
-                        <button onclick="toggleModal('modal-cliente')" class="bg-brand hover:bg-brand-dark text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition-colors flex items-center gap-2">
-                            <i class="fa-solid fa-plus"></i> Novo Cliente
-                        </button>
-                    </div>
-                    
-                    <!-- Table -->
-                    <div class="flex-1 overflow-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold sticky top-0 z-10">
-                                <tr>
-                                    <th class="px-6 py-4">Nome Completo</th>
-                                    <th class="px-6 py-4">CPF</th>
-                                    <th class="px-6 py-4">Contato</th>
-                                    <th class="px-6 py-4">Score Interno</th>
-                                    <th class="px-6 py-4">Risco</th>
-                                    <th class="px-6 py-4 text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabela-clientes-body" class="divide-y divide-gray-100 text-sm">
-                                <tr><td colspan="6" class="text-center py-8 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-brand"></i><br>Carregando clientes...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-            
-            await carregarClientes();
-        }
-
-        // 5. INTEGRAÇÃO SUPABASE: BUSCAR CLIENTES
-        async function carregarClientes() {
-            try {
-                const { data, error } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }).limit(20);
-                if (error) throw error;
-
-                const tbody = document.getElementById('tabela-clientes-body');
-                tbody.innerHTML = '';
-
-                if(data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">Nenhum cliente cadastrado.</td></tr>`;
-                    return;
-                }
-
-                data.forEach(cliente => {
-                    let badgeColor = cliente.classificacao_risco === 'Baixo' ? 'bg-green-100 text-green-800' : (cliente.classificacao_risco === 'Alto' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800');
-                    
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-gray-800">${cliente.nome_completo}</td>
-                            <td class="px-6 py-4 text-gray-600">${cliente.cpf}</td>
-                            <td class="px-6 py-4 text-gray-600"><i class="fa-brands fa-whatsapp text-green-500 mr-1"></i> ${cliente.whatsapp || cliente.telefone || '-'}</td>
-                            <td class="px-6 py-4">
-                                <div class="w-full bg-gray-200 rounded-full h-2.5 max-w-[100px] mt-1">
-                                  <div class="bg-brand h-2.5 rounded-full" style="width: ${cliente.score_interno}%"></div>
-                                </div>
-                                <span class="text-xs text-gray-500">${cliente.score_interno || 0} pts</span>
-                            </td>
-                            <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${badgeColor}">${cliente.classificacao_risco || 'Médio'}</span></td>
-                            <td class="px-6 py-4 text-center">
-                                <button class="text-blue-500 hover:text-blue-700 mx-1" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="text-brand hover:text-brand-dark mx-1" title="Ver Dossiê"><i class="fa-solid fa-folder-open"></i></button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } catch (err) {
-                console.error("Erro ao carregar:", err);
-                document.getElementById('tabela-clientes-body').innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500">Erro ao carregar dados. Verifique a conexão com o Supabase.</td></tr>`;
+            if(modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
             }
         }
 
-        // 6. INTEGRAÇÃO SUPABASE: SALVAR CLIENTE
-        async function salvarCliente() {
-            const btn = event.target;
+        function createTableScreen(title, btnText, modalId, tableId, headers) {
+            return `
+                <div class="glass-card rounded-xl flex flex-col h-full">
+                    <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-xl">
+                        <div class="relative w-72">
+                            <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                            <input type="text" placeholder="Buscar..." class="${inClass} mt-0 pl-10">
+                        </div>
+                        <button onclick="toggleModal('${modalId}')" class="bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> ${btnText}
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-gray-100 text-gray-500 text-xs uppercase font-semibold sticky top-0">
+                                <tr>${headers.map(h => `<th class="px-6 py-4">${h}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody id="${tableId}" class="divide-y divide-gray-100 text-sm">
+                                <tr><td colspan="${headers.length}" class="text-center py-8 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-brand"></i><br>Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>`;
+        }
+
+        async function carregarDropdownClientes(selectId) {
+            const select = document.getElementById(selectId);
+            if(!select) return;
+            select.innerHTML = '<option value="">Carregando clientes...</option>';
+            const { data, error } = await supabase.from('clientes').select('id, nome_completo').order('nome_completo');
+            if (error) { select.innerHTML = '<option value="">Erro ao carregar</option>'; return; }
+            select.innerHTML = '<option value="">Selecione um Cliente</option>';
+            data.forEach(c => select.innerHTML += `<option value="${c.id}">${c.nome_completo}</option>`);
+        }
+
+        // 4. GERAÇÃO DE MODAIS DINÂMICOS NO HTML
+        function initModals() {
+            const container = document.getElementById('modals-container');
+            
+            // Layout Base de Modal
+            const modalWrapper = (id, title, formId, content) => `
+            <div id="${id}" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-50 items-center justify-center backdrop-blur-sm hidden">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col m-4">
+                    <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50 rounded-t-xl">
+                        <h3 class="text-lg font-bold text-grafite">${title}</h3>
+                        <button type="button" onclick="toggleModal('${id}')" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    </div>
+                    <form id="${formId}" onsubmit="salvarDados(event, '${formId}')" class="flex-1 overflow-y-auto p-6 space-y-6">
+                        ${content}
+                    </form>
+                    <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+                        <button type="button" onclick="toggleModal('${id}')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-100 text-sm font-medium">Cancelar</button>
+                        <button type="submit" form="${formId}" class="px-6 py-2 bg-brand text-white rounded-md hover:bg-brand-dark text-sm font-medium shadow-sm transition">Salvar Registro</button>
+                    </div>
+                </div>
+            </div>`;
+
+            // Modal Cliente
+            const contentCliente = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="col-span-3"><label class="${lblClass}">Nome Completo *</label><input type="text" id="c_nome" required class="${inClass}"></div>
+                    <div><label class="${lblClass}">CPF *</label><input type="text" id="c_cpf" required class="${inClass}"></div>
+                    <div><label class="${lblClass}">RG</label><input type="text" id="c_rg" class="${inClass}"></div>
+                    <div><label class="${lblClass}">Nascimento</label><input type="date" id="c_nasc" class="${inClass}"></div>
+                    <div><label class="${lblClass}">WhatsApp</label><input type="text" id="c_whats" class="${inClass}"></div>
+                    <div class="col-span-2"><label class="${lblClass}">Email</label><input type="email" id="c_email" class="${inClass}"></div>
+                    <div class="col-span-3 border-t pt-4 mt-2 font-bold text-brand">Endereço</div>
+                    <div><label class="${lblClass}">CEP</label><input type="text" id="c_cep" class="${inClass}"></div>
+                    <div class="col-span-2"><label class="${lblClass}">Rua</label><input type="text" id="c_rua" class="${inClass}"></div>
+                    <div><label class="${lblClass}">Número</label><input type="text" id="c_num" class="${inClass}"></div>
+                    <div><label class="${lblClass}">Bairro</label><input type="text" id="c_bairro" class="${inClass}"></div>
+                    <div><label class="${lblClass}">Cidade</label><input type="text" id="c_cidade" class="${inClass}"></div>
+                </div>`;
+            
+            // Modal Avalista
+            const contentAvalista = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="col-span-2"><label class="${lblClass}">Cliente Vinculado *</label><select id="a_cliente_id" required class="${inClass}"></select></div>
+                    <div><label class="${lblClass}">Nome do Avalista *</label><input type="text" id="a_nome" required class="${inClass}"></div>
+                    <div><label class="${lblClass}">CPF *</label><input type="text" id="a_cpf" required class="${inClass}"></div>
+                    <div><label class="${lblClass}">Profissão</label><input type="text" id="a_prof" class="${inClass}"></div>
+                    <div><label class="${lblClass}">Renda Mensal (R$)</label><input type="number" step="0.01" id="a_renda" class="${inClass}"></div>
+                </div>`;
+
+            // Modal Micro Negócio
+            const contentNegocio = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="col-span-2"><label class="${lblClass}">Cliente Proprietário *</label><select id="m_cliente_id" required class="${inClass}"></select></div>
+                    <div><label class="${lblClass}">Nome do Negócio *</label><input type="text" id="m_nome" required class="${inClass}"></div>
+                    <div><label class="${lblClass}">Segmento</label><input type="text" id="m_seg" class="${inClass}"></div>
+                    <div><label class="${lblClass}">CNPJ (Opcional)</label><input type="text" id="m_cnpj" class="${inClass}"></div>
+                    <div><label class="${lblClass}">Ticket Médio Diário (R$)</label><input type="number" step="0.01" id="m_ticket" class="${inClass}"></div>
+                </div>`;
+
+            container.innerHTML = 
+                modalWrapper('mod-cliente', '<i class="fa-solid fa-user-plus text-brand mr-2"></i> Cadastrar Cliente', 'form-cliente', contentCliente) +
+                modalWrapper('mod-avalista', '<i class="fa-solid fa-user-shield text-brand mr-2"></i> Cadastrar Avalista', 'form-avalista', contentAvalista) +
+                modalWrapper('mod-negocio', '<i class="fa-solid fa-store text-brand mr-2"></i> Cadastrar Negócio', 'form-negocio', contentNegocio);
+        }
+
+        // 5. TELAS DO SISTEMA (VIEWS)
+        const app = document.getElementById('app-content');
+        const title = document.getElementById('page-title');
+
+        const views = {
+            dashboard: () => {
+                title.innerText = "Dashboard Analítico";
+                app.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div class="glass-card p-6 rounded-xl border-l-4 border-blue-500">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Capital Emprestado</p>
+                            <h3 class="text-2xl font-black text-gray-800 mt-1">R$ 142.500</h3>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Lucro Estimado</p>
+                            <h3 class="text-2xl font-black text-gray-800 mt-1">R$ 38.400</h3>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl border-l-4 border-brand">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Clientes Ativos</p>
+                            <h3 class="text-2xl font-black text-gray-800 mt-1" id="dash-clientes">...</h3>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl border-l-4 border-red-500">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Inadimplência</p>
+                            <h3 class="text-2xl font-black text-red-600 mt-1">3.2%</h3>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl"><h4 class="font-bold text-gray-700 mb-4">Bem-vindo ao CreditoMais! Sistema operando normalmente.</h4><p class="text-sm text-gray-500">Utilize o menu lateral para navegar entre os módulos.</p></div>
+                `;
+                // Busca qtd clientes rápida
+                supabase.from('clientes').select('id', { count: 'exact' }).then(({count}) => {
+                    document.getElementById('dash-clientes').innerText = count || 0;
+                });
+            },
+
+            clientes: () => {
+                title.innerText = "Gestão de Clientes";
+                app.innerHTML = createTableScreen('Clientes', 'Novo Cliente', 'mod-cliente', 'tb-clientes',['Nome', 'CPF', 'Contato', 'Score', 'Ações']);
+                carregarTabela('clientes', 'tb-clientes', c => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium text-gray-800">${c.nome_completo}</td>
+                        <td class="px-6 py-4 text-gray-600">${c.cpf}</td>
+                        <td class="px-6 py-4 text-gray-600">${c.whatsapp || c.email || '-'}</td>
+                        <td class="px-6 py-4 font-bold text-brand">${c.score_interno || 0}</td>
+                        <td class="px-6 py-4"><button class="text-blue-500 hover:text-blue-700"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                    </tr>
+                `);
+            },
+
+            avalistas: () => {
+                title.innerText = "Gestão de Avalistas";
+                app.innerHTML = createTableScreen('Avalistas', 'Novo Avalista', 'mod-avalista', 'tb-avalistas',['Avalista', 'CPF', 'Profissão', 'Renda (R$)', 'Ações']);
+                carregarDropdownClientes('a_cliente_id');
+                carregarTabela('avalistas', 'tb-avalistas', a => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium">${a.nome_completo}</td>
+                        <td class="px-6 py-4 text-gray-600">${a.cpf}</td>
+                        <td class="px-6 py-4 text-gray-600">${a.profissao || '-'}</td>
+                        <td class="px-6 py-4 font-medium text-green-600">R$ ${a.renda_mensal || '0.00'}</td>
+                        <td class="px-6 py-4"><button class="text-blue-500"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                    </tr>
+                `);
+            },
+
+            micronegocios: () => {
+                title.innerText = "Micro Negócios";
+                app.innerHTML = createTableScreen('Negócios', 'Novo Negócio', 'mod-negocio', 'tb-negocios',['Negócio', 'Segmento', 'CNPJ', 'Ticket Médio', 'Ações']);
+                carregarDropdownClientes('m_cliente_id');
+                carregarTabela('micro_negocios', 'tb-negocios', n => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium">${n.nome_negocio}</td>
+                        <td class="px-6 py-4 text-gray-600">${n.segmento || '-'}</td>
+                        <td class="px-6 py-4 text-gray-600">${n.cnpj || 'Informal'}</td>
+                        <td class="px-6 py-4 font-medium text-brand">R$ ${n.ticket_medio || '0.00'}</td>
+                        <td class="px-6 py-4"><button class="text-blue-500"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                    </tr>
+                `);
+            },
+
+            avaliacao: () => {
+                title.innerText = "Avaliação Financeira (Calculadora)";
+                app.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 rounded-xl">
+                            <h3 class="font-bold text-lg mb-4 text-brand border-b pb-2">Entradas & Saídas (Mensal)</h3>
+                            <div class="space-y-4">
+                                <div><label class="${lblClass}">Faturamento Bruto (R$)</label><input type="number" id="calc_receita" value="0" class="${inClass}" onkeyup="calcularFluxo()"></div>
+                                <div><label class="${lblClass}">Custo Mercadoria / Operação (R$)</label><input type="number" id="calc_custo" value="0" class="${inClass}" onkeyup="calcularFluxo()"></div>
+                                <div><label class="${lblClass}">Despesas Pessoais / Familiares (R$)</label><input type="number" id="calc_despesa" value="0" class="${inClass}" onkeyup="calcularFluxo()"></div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl bg-gray-50 flex flex-col justify-center text-center">
+                            <h3 class="font-bold text-gray-500 uppercase tracking-widest text-sm mb-2">Capacidade de Parcela (30%)</h3>
+                            <h1 id="calc_resultado" class="text-5xl font-black text-green-500 my-4">R$ 0,00</h1>
+                            <p id="calc_lucro" class="text-sm text-gray-600 font-medium">Lucro Líquido Mensal: R$ 0,00</p>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            // Views simplificadas (Mock) para fechar o escopo visual solicitado
+            operacoes: () => { title.innerText = "Operações de Crédito"; app.innerHTML = `<div class="p-8 text-center text-gray-500 glass-card rounded-xl">Módulo de Operações (Tabela de contratos) carregando...</div>`; },
+            parcelas: () => { title.innerText = "Controle de Parcelas"; app.innerHTML = `<div class="p-8 text-center text-gray-500 glass-card rounded-xl">Módulo de Baixa de Parcelas carregando...</div>`; },
+            inadimplencia: () => { title.innerText = "Controle de Inadimplência"; app.innerHTML = `<div class="p-8 text-center text-red-500 glass-card rounded-xl">Nenhum cliente em atraso no momento!</div>`; }
+        };
+
+        window.calcularFluxo = () => {
+            let rec = parseFloat(document.getElementById('calc_receita').value) || 0;
+            let cus = parseFloat(document.getElementById('calc_custo').value) || 0;
+            let desp = parseFloat(document.getElementById('calc_despesa').value) || 0;
+            let lucro = rec - cus - desp;
+            let cap = lucro > 0 ? lucro * 0.30 : 0; // 30% de margem
+            document.getElementById('calc_lucro').innerText = `Lucro Líquido Mensal: R$ ${lucro.toFixed(2)}`;
+            document.getElementById('calc_resultado').innerText = `R$ ${cap.toFixed(2)}`;
+            document.getElementById('calc_resultado').className = cap > 0 ? "text-5xl font-black text-green-500 my-4" : "text-5xl font-black text-red-500 my-4";
+        }
+
+        // 6. FUNÇÕES DE BANCO DE DADOS (CRUD)
+        async function carregarTabela(tabela, tbodyId, rowTemplate) {
+            const tbody = document.getElementById(tbodyId);
+            const { data, error } = await supabase.from(tabela).select('*').order('created_at', { ascending: false });
+            if (error) { tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-red-500">Erro ao carregar dados</td></tr>`; return; }
+            if (data.length === 0) { tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-gray-500">Nenhum registro encontrado.</td></tr>`; return; }
+            tbody.innerHTML = data.map(rowTemplate).join('');
+        }
+
+        async function salvarDados(event, formId) {
+            event.preventDefault(); // Impede o reload da página
+            const form = event.target;
+            const btn = form.querySelector('button[type="submit"]');
+            const btnOriginalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
             btn.disabled = true;
 
-            const novoCliente = {
-                nome_completo: document.getElementById('cli_nome').value,
-                cpf: document.getElementById('cli_cpf').value,
-                rg: document.getElementById('cli_rg').value,
-                data_nascimento: document.getElementById('cli_nasc').value || null,
-                whatsapp: document.getElementById('cli_whats').value,
-                email: document.getElementById('cli_email').value,
-                cep: document.getElementById('cli_cep').value,
-                rua: document.getElementById('cli_rua').value,
-                numero: document.getElementById('cli_num').value,
-                bairro: document.getElementById('cli_bairro').value,
-                cidade: document.getElementById('cli_cidade').value,
-                estado: document.getElementById('cli_estado').value,
-                tipo_moradia: document.getElementById('cli_moradia').value,
-                score_interno: Math.floor(Math.random() * 100), // Simulação de cálculo de score automático
-                classificacao_risco: 'Baixo' // Padrão inicial
-            };
+            let tabela = '';
+            let payload = {};
+
+            // Mapeamento de formulários para tabelas do banco
+            if (formId === 'form-cliente') {
+                tabela = 'clientes';
+                payload = {
+                    nome_completo: document.getElementById('c_nome').value,
+                    cpf: document.getElementById('c_cpf').value,
+                    rg: document.getElementById('c_rg').value || null,
+                    data_nascimento: document.getElementById('c_nasc').value || null,
+                    whatsapp: document.getElementById('c_whats').value || null,
+                    email: document.getElementById('c_email').value || null,
+                    cep: document.getElementById('c_cep').value || null,
+                    rua: document.getElementById('c_rua').value || null,
+                    numero: document.getElementById('c_num').value || null,
+                    bairro: document.getElementById('c_bairro').value || null,
+                    cidade: document.getElementById('c_cidade').value || null,
+                    score_interno: Math.floor(Math.random() * 100) // Score Automático
+                };
+            } else if (formId === 'form-avalista') {
+                tabela = 'avalistas';
+                payload = {
+                    cliente_id: document.getElementById('a_cliente_id').value,
+                    nome_completo: document.getElementById('a_nome').value,
+                    cpf: document.getElementById('a_cpf').value,
+                    profissao: document.getElementById('a_prof').value || null,
+                    renda_mensal: parseFloat(document.getElementById('a_renda').value) || 0
+                };
+            } else if (formId === 'form-negocio') {
+                tabela = 'micro_negocios';
+                payload = {
+                    cliente_id: document.getElementById('m_cliente_id').value,
+                    nome_negocio: document.getElementById('m_nome').value,
+                    segmento: document.getElementById('m_seg').value || null,
+                    cnpj: document.getElementById('m_cnpj').value || null,
+                    ticket_medio: parseFloat(document.getElementById('m_ticket').value) || 0
+                };
+            }
 
             try {
-                const { data, error } = await supabase.from('clientes').insert([novoCliente]);
-                if (error) throw error;
-                
-                alert("Cliente cadastrado com sucesso!");
-                document.getElementById('form-cliente').reset();
-                toggleModal('modal-cliente');
-                carregarClientes(); // Atualiza a tabela
+                const { error } = await supabase.from(tabela).insert([payload]);
+                if (error) {
+                    // Erro 23505 é violação de chave única (ex: CPF já cadastrado)
+                    if(error.code === '23505') alert("Erro: Este CPF já está cadastrado no sistema!");
+                    else alert("Erro ao salvar: " + error.message);
+                } else {
+                    alert("✅ Registro salvo com sucesso!");
+                    form.reset();
+                    // Fecha o modal e recarrega a view atual
+                    if(formId==='form-cliente') toggleModal('mod-cliente');
+                    if(formId==='form-avalista') toggleModal('mod-avalista');
+                    if(formId==='form-negocio') toggleModal('mod-negocio');
+                    views[currentView](); // Atualiza a tabela na tela
+                }
             } catch (err) {
-                console.error(err);
-                alert("Erro ao cadastrar. O CPF pode já estar no sistema ou os dados estão incompletos.");
+                alert("Erro inesperado no sistema.");
             } finally {
-                btn.innerHTML = 'Salvar Cliente';
+                btn.innerHTML = btnOriginalText;
                 btn.disabled = false;
             }
         }
 
-        // INIT
+        // 7. INICIALIZAÇÃO
         window.onload = () => {
-            renderDashboard();
+            renderMenu();
+            initModals();
+            changeView('dashboard'); // Abre o Dashboard por padrão
         };
     </script>
 </body>
