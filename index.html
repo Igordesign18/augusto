@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreditoMais | Core Bancário Interno</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SUPABASE JS (Oficial) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* ================= VARIÁVEIS DE TEMA ================= */
+        :root {
+            --primary: #FF6B00;
+            --primary-dark: #cc5600;
+            --primary-light: #fff0e6;
+            --sidebar-bg: #111827; 
+            --sidebar-hover: #1f2937;
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --radius: 8px;
+        }
+
+        /* ================= BASE ================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { display: flex; height: 100vh; background-color: var(--bg); color: var(--text-main); overflow: hidden; }
+        
+        h1, h2, h3, h4 { color: var(--text-main); }
+        .text-primary { color: var(--primary); }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .font-bold { font-weight: 700; }
+        .text-sm { font-size: 0.875rem; }
+        .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mt-3 { margin-top: 1.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
+        .gap-1 { gap: 0.5rem; } .gap-2 { gap: 1rem; }
+        
+        /* ================= SIDEBAR ================= */
+        .sidebar { width: 260px; background: var(--sidebar-bg); display: flex; flex-direction: column; color: #fff; flex-shrink: 0; transition: 0.3s; z-index: 100; }
+        .brand { padding: 1.5rem; font-size: 1.5rem; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; }
+        .brand span { color: var(--primary); }
+        .menu-container { flex: 1; overflow-y: auto; padding: 1rem 0; }
+        .menu-item { padding: 0.8rem 1.5rem; display: flex; align-items: center; gap: 12px; color: #9ca3af; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; font-size: 0.95rem; font-weight: 500; }
+        .menu-item:hover, .menu-item.active { background: var(--sidebar-hover); color: #fff; border-left-color: var(--primary); }
+        .menu-item i { width: 20px; text-align: center; }
+
+        /* ================= MAIN LAYOUT ================= */
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { background: var(--surface); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); z-index: 10; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 40px; height: 40px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .content { flex: 1; overflow-y: auto; padding: 2rem; }
+        
+        .view { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ================= COMPONENTES ================= */
+        .card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+        .card-title { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--primary); }
+        
+        .grid-10 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+
+        .kpi-card { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
+        .kpi-card h4 { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+        .kpi-card .value { font-size: 1.8rem; font-weight: 800; color: var(--text-main); }
+        .kpi-card .value.green { color: var(--success); }
+        .kpi-card .value.red { color: var(--danger); }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+        .form-group input, .form-group select, .form-group textarea { padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; color: var(--text-main); outline: none; transition: 0.2s; background: #fff; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        
+        .section-divider { width: 100%; height: 1px; background: var(--border); margin: 2rem 0 1.5rem 0; position: relative; }
+        .section-divider span { position: absolute; top: -10px; left: 15px; background: var(--surface); padding: 0 10px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+
+        .btn { padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-success { background: var(--success); color: #fff; }
+        
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        th { background-color: #f9fafb; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
+        
+        .badge { padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-yellow { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+        <div class="brand"><i class="fa-solid fa-layer-group"></i> Credito<span>Mais</span></div>
+        <div class="menu-container">
+            <div class="menu-item active" onclick="nav('dashboard')"><i class="fa-solid fa-chart-line"></i> Dashboard</div>
+            <div class="menu-item" onclick="nav('clientes')"><i class="fa-solid fa-users"></i> Clientes</div>
+            <div class="menu-item" onclick="nav('avalistas')"><i class="fa-solid fa-handshake"></i> Avalistas</div>
+            <div class="menu-item" onclick="nav('negocios')"><i class="fa-solid fa-store"></i> Micro Negócios</div>
+            <div class="menu-item" onclick="nav('financeiro')"><i class="fa-solid fa-calculator"></i> Avaliação Financeira</div>
+            <div class="menu-item" onclick="nav('operacoes')"><i class="fa-solid fa-file-invoice-dollar"></i> Operações</div>
+            <div class="menu-item" onclick="nav('parcelas')"><i class="fa-solid fa-calendar-check"></i> Parcelas</div>
+            <div class="menu-item" onclick="nav('relatorios')"><i class="fa-solid fa-file-pdf"></i> Relatórios</div>
+        </div>
+    </aside>
+
+    <!-- ================= MAIN WRAPPER ================= -->
+    <div class="main-wrapper">
+        <header class="topbar">
+            <div>
+                <h2 id="header-title" style="font-size: 1.2rem;">Dashboard Geral</h2>
+                <p class="text-sm text-muted">Gestão Conectada ao Supabase</p>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <p class="font-bold text-sm" style="margin: 0;"><span id="db-status" class="text-warning">Conectando...</span></p>
+                    <p class="text-muted" style="font-size: 0.75rem; margin: 0;">PostgreSQL (Supabase)</p>
+                </div>
+                <div class="avatar"><i class="fa-solid fa-database"></i></div>
+            </div>
+        </header>
+
+        <div class="content">
+
+            <!-- ================= 1. DASHBOARD ================= -->
+            <div id="view-dashboard" class="view active">
+                <div class="grid-10 mb-2">
+                    <div class="kpi-card"><h4>Total Clientes BD</h4><div class="value" id="dash-tot-cli">...</div></div>
+                    <div class="kpi-card" style="border-color: var(--success)"><h4>Operações Ativas</h4><div class="value green">Em breve</div></div>
+                    <div class="kpi-card" style="border-color: var(--danger)"><h4>Inadimplência</h4><div class="value red">7.9%</div></div>
+                    <div class="kpi-card"><h4>Ticket Médio</h4><div class="value">R$ 2.500</div></div>
+                </div>
+                
+                <div class="grid-2 mt-3">
+                    <div class="card"><div class="card-header"><span class="card-title"><i class="fa-solid fa-chart-column"></i> Volume Liberado</span></div><canvas id="chartOps"></canvas></div>
+                    <div class="card"><div class="card-header"><span class="card-title"><i class="fa-solid fa-chart-pie"></i> Inadimplência vs Pagos</span></div><canvas id="chartApprove"></canvas></div>
+                </div>
+            </div>
+
+            <!-- ================= 2. CLIENTES ================= -->
+            <div id="view-clientes" class="view">
+                
+                <!-- Formulário de Cadastro -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fa-solid fa-user-plus"></i> Cadastro de Cliente no Supabase</span>
+                        <div class="flex gap-1">
+                            <button class="btn btn-primary" id="btn-salvar-cli" onclick="salvarCliente()"><i class="fa-solid fa-save"></i> Salvar Cliente</button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-4">
+                        <div class="form-group" style="grid-column: span 2;"><label>Nome Completo *</label><input type="text" id="cli-nome" placeholder="Nome do cliente"></div>
+                        <div class="form-group"><label>CPF *</label><input type="text" id="cli-cpf" placeholder="000.000.000-00"></div>
+                        <div class="form-group"><label>Data de Nascimento</label><input type="date" id="cli-nasc"></div>
+                        
+                        <div class="form-group"><label>Telefone / WhatsApp</label><input type="text" id="cli-tel"></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Endereço</label><input type="text" id="cli-end"></div>
+                        <div class="form-group"><label>Score Interno</label><input type="number" id="cli-score" value="500"></div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Listagem em Tempo Real -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fa-solid fa-table"></i> Clientes Cadastrados (Banco de Dados)</span>
+                        <button class="btn btn-outline" onclick="carregarClientes()"><i class="fa-solid fa-rotate-right"></i> Atualizar Tabela</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="tabela-clientes">
+                            <thead>
+                                <tr>
+                                    <th>Data Cadastro</th>
+                                    <th>Nome Completo</th>
+                                    <th>CPF</th>
+                                    <th>Telefone</th>
+                                    <th>Score</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-clientes">
+                                <!-- Preenchido pelo JS do Supabase -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= 5. AVALIAÇÃO FINANCEIRA ================= -->
+            <div id="view-financeiro" class="view">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title"><i class="fa-solid fa-cash-register"></i> Receitas & Despesas (Cálculo Automático)</span></div>
+                        
+                        <h4 class="text-primary mb-2">Receitas Mensais</h4>
+                        <div class="grid-2">
+                            <div class="form-group"><label>Faturamento Médio</label><input type="number" class="fin-calc" id="fin-fat" value="0"></div>
+                            <div class="form-group"><label>Outras Rendas</label><input type="number" class="fin-calc" id="fin-out-ren" value="0"></div>
+                        </div>
+
+                        <div class="section-divider"><span>Despesas</span></div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>Custos Operacionais</label><input type="number" class="fin-calc" id="fin-op" value="0"></div>
+                            <div class="form-group"><label>Despesas Pessoais</label><input type="number" class="fin-calc" id="fin-pes" value="0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Fluxo de Caixa Acoplado -->
+                    <div class="card" style="background: var(--sidebar-bg); color: #fff;">
+                        <div class="card-header" style="border-color: rgba(255,255,255,0.1)"><span class="card-title" style="color:#fff"><i class="fa-solid fa-chart-pie"></i> Resultado Real</span></div>
+                        
+                        <div class="grid-2 mb-2">
+                            <div class="form-group"><label style="color:#9ca3af">Receita Total</label><input type="text" id="fc-rec" readonly style="background: rgba(255,255,255,0.05); color:#fff;"></div>
+                            <div class="form-group"><label style="color:#9ca3af">Despesa Total</label><input type="text" id="fc-desp-tot" readonly style="background: rgba(255,255,255,0.05); color:#ef4444; font-weight:bold;"></div>
+                        </div>
+
+                        <div class="form-group mb-2"><label style="color:#10b981; font-size:1rem;">Lucro Líquido Real (Sobra)</label><input type="text" id="fc-lucro" readonly style="background: #064e3b; color:#34d399; font-size: 1.5rem; font-weight:800; border:none;"></div>
+                        
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label style="color:#9ca3af">Margem Confiança (%)</label>
+                                <select id="fc-margem" onchange="calcFinanceiro()" style="background: #1f2937; color:#fff; border-color:#374151;">
+                                    <option value="0.30">30% (Conservador)</option>
+                                    <option value="0.40" selected>40% (Padrão)</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label style="color:#f59e0b">Capacidade Máx. Parcela</label><input type="text" id="fc-max-parc" readonly style="background: rgba(245, 158, 11, 0.1); color:#fcd34d; font-weight:bold;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 6. OPERAÇÕES (Calculadora Price) ================= -->
+            <div id="view-operacoes" class="view">
+                <div class="card">
+                    <div class="card-header"><span class="card-title"><i class="fa-solid fa-file-contract"></i> Emissão de Contrato de Crédito</span></div>
+                    
+                    <div class="grid-4">
+                        <div class="form-group"><label>Valor Aprovado (R$)</label><input type="number" id="op-val" oninput="calcOp()" style="background: #f0fdf4; border-color: #86efac;"></div>
+                        <div class="form-group"><label>Taxa de Juros (% a.m)</label><input type="number" step="0.1" id="op-tax" oninput="calcOp()"></div>
+                        <div class="form-group"><label>Prazo (Meses)</label><input type="number" id="op-prz" oninput="calcOp()"></div>
+                        
+                        <div class="form-group"><label>Valor Parcela (Automático)</label><input type="text" id="op-parc-val" readonly style="color: var(--primary); font-weight: 800; font-size: 1.1rem;"></div>
+                        <div class="form-group"><label>Juros Total</label><input type="text" id="op-juros" readonly style="color: var(--danger);"></div>
+                        <div class="form-group"><label>Vlr Total Contrato</label><input type="text" id="op-total" readonly style="font-weight: bold;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Views vazias para estrutura -->
+            <div id="view-avalistas" class="view"><div class="card"><h3>Em Construção</h3></div></div>
+            <div id="view-negocios" class="view"><div class="card"><h3>Em Construção</h3></div></div>
+            <div id="view-parcelas" class="view"><div class="card"><h3>Em Construção</h3></div></div>
+            <div id="view-relatorios" class="view"><div class="card"><h3>Em Construção</h3></div></div>
+
+        </div>
+    </div>
+
+    <!-- ================= INTEGRAÇÃO SUPABASE & JAVASCRIPT LOGIC ================= -->
+    <script>
+        // 1. INICIALIZAÇÃO DO SUPABASE
+        const supabaseUrl = 'https://hrnekdzkdapqeaydzcpo.supabase.co';
+        const supabaseKey = 'sb_publishable_iqElQyZrTgJcrZaL8H4utQ_4Nb-_DQw';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Verifica conexão (Ping)
+        async function testarConexao() {
+            try {
+                const { count, error } = await supabase.from('clientes').select('*', { count: 'exact', head: true });
+                if (!error) {
+                    document.getElementById('db-status').innerText = "Online";
+                    document.getElementById('db-status').className = "text-success";
+                    document.getElementById('dash-tot-cli').innerText = count || 0;
+                }
+            } catch (err) {
+                console.error("Erro Supabase:", err);
+                document.getElementById('db-status').innerText = "Erro BD";
+                document.getElementById('db-status').className = "text-danger";
+            }
+        }
+        testarConexao();
+
+        // 2. NAVEGAÇÃO SPA
+        function nav(viewId) {
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+
+            const titles = { 'dashboard': 'Dashboard', 'clientes': 'Clientes', 'avalistas': 'Avalistas', 'negocios': 'Negócios', 'financeiro': 'Financeiro', 'operacoes': 'Operações', 'parcelas': 'Parcelas', 'relatorios': 'Relatórios' };
+            document.getElementById('header-title').innerText = titles[viewId];
+
+            if(viewId === 'dashboard' && !window.chartsRendered) initCharts();
+            if(viewId === 'clientes') carregarClientes(); // Carrega tabela automaticamente ao abrir aba
+        }
+
+        // 3. SALVAR CLIENTE (INSERT NO SUPABASE)
+        async function salvarCliente() {
+            const btn = document.getElementById('btn-salvar-cli');
+            const nome = document.getElementById('cli-nome').value;
+            const cpf = document.getElementById('cli-cpf').value;
+            const nasc = document.getElementById('cli-nasc').value;
+            const tel = document.getElementById('cli-tel').value;
+            const end = document.getElementById('cli-end').value;
+            const score = document.getElementById('cli-score').value || 0;
+
+            if (!nome || !cpf) {
+                alert("Nome e CPF são obrigatórios!");
+                return;
+            }
+
+            // Animação do botão
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando no Supabase...';
+            btn.disabled = true;
+
+            const { data, error } = await supabase
+                .from('clientes')
+                .insert([
+                    { 
+                        nome_completo: nome, 
+                        cpf: cpf, 
+                        data_nascimento: nasc || null,
+                        telefone: tel,
+                        rua: end,
+                        score_interno: parseInt(score)
+                    }
+                ]);
+
+            btn.innerHTML = '<i class="fa-solid fa-save"></i> Salvar Cliente';
+            btn.disabled = false;
+
+            if (error) {
+                alert("Erro ao salvar: " + error.message);
+                console.error(error);
+            } else {
+                alert("Cliente registrado com sucesso no Banco de Dados!");
+                
+                // Limpa campos
+                document.getElementById('cli-nome').value = '';
+                document.getElementById('cli-cpf').value = '';
+                document.getElementById('cli-nasc').value = '';
+                document.getElementById('cli-tel').value = '';
+                document.getElementById('cli-end').value = '';
+                
+                carregarClientes(); // Atualiza a tabela na tela
+                testarConexao();    // Atualiza o KPI do dashboard
+            }
+        }
+
+        // 4. LER CLIENTES (SELECT DO SUPABASE)
+        async function carregarClientes() {
+            const tbody = document.getElementById('tbody-clientes');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center"><i class="fa-solid fa-spinner fa-spin"></i> Buscando no banco de dados...</td></tr>';
+
+            const { data, error } = await supabase
+                .from('clientes')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(20); // Busca os últimos 20
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Erro ao carregar: ${error.message}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Nenhum cliente cadastrado ainda.</td></tr>';
+                return;
+            }
+
+            data.forEach(cliente => {
+                const dataFormatada = new Date(cliente.created_at).toLocaleDateString('pt-BR');
+                const badge = cliente.score_interno > 600 ? 'badge-green' : 'badge-yellow';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dataFormatada}</td>
+                    <td class="font-bold">${cliente.nome_completo}</td>
+                    <td>${cliente.cpf}</td>
+                    <td>${cliente.telefone || '-'}</td>
+                    <td><span class="badge ${badge}">${cliente.score_interno}</span></td>
+                    <td>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger)" onclick="deletarCliente('${cliente.id}')"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 4.1 DELETAR CLIENTE (DELETE NO SUPABASE)
+        async function deletarCliente(id) {
+            if(confirm("Tem certeza que deseja apagar este cliente do Banco de Dados?")) {
+                const { error } = await supabase.from('clientes').delete().eq('id', id);
+                if(error) alert("Erro ao deletar: " + error.message);
+                else {
+                    carregarClientes();
+                    testarConexao();
+                }
+            }
+        }
+
+        // 5. CÁLCULO FINANCEIRO E FLUXO DE CAIXA
+        const formataBRL = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        function calcFinanceiro() {
+            const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
+            const rec = getV('fin-fat') + getV('fin-out-ren');
+            const totalDesp = getV('fin-op') + getV('fin-pes');
+            const lucro = rec - totalDesp;
+            
+            const margem = parseFloat(document.getElementById('fc-margem').value);
+            const capacidade = lucro > 0 ? (lucro * margem) : 0;
+
+            document.getElementById('fc-rec').value = formataBRL(rec);
+            document.getElementById('fc-desp-tot').value = formataBRL(totalDesp);
+            document.getElementById('fc-lucro').value = formataBRL(lucro);
+            document.getElementById('fc-max-parc').value = formataBRL(capacidade);
+        }
+        document.querySelectorAll('.fin-calc').forEach(el => el.addEventListener('input', calcFinanceiro));
+
+        // 6. CÁLCULO PRICE DE EMPRÉSTIMO
+        function calcOp() {
+            const val = parseFloat(document.getElementById('op-val').value) || 0;
+            const prz = parseInt(document.getElementById('op-prz').value) || 0;
+            const tax = (parseFloat(document.getElementById('op-tax').value) || 0) / 100;
+            
+            if (val > 0 && prz > 0 && tax > 0) {
+                const pmt = val * (tax * Math.pow((1 + tax), prz)) / (Math.pow((1 + tax), prz) - 1);
+                const total = pmt * prz;
+                
+                document.getElementById('op-parc-val').value = formataBRL(pmt);
+                document.getElementById('op-total').value = formataBRL(total);
+                document.getElementById('op-juros').value = formataBRL(total - val);
+            } else {
+                document.getElementById('op-parc-val').value = "R$ 0,00";
+            }
+        }
+
+        // 7. GRÁFICOS (Chart.js Mocks para estética do dashboard)
+        function initCharts() {
+            window.chartsRendered = true;
+            Chart.defaults.font.family = 'Inter';
+            new Chart(document.getElementById('chartOps'), {
+                type: 'bar',
+                data: { labels:['Set', 'Out', 'Nov', 'Dez', 'Jan', 'Fev'], datasets:[{ label: 'Liberado (R$)', data:[120k, 150k, 135k, 180k, 160k, 210k], backgroundColor: '#FF6B00', borderRadius: 4 }] }
+            });
+            new Chart(document.getElementById('chartApprove'), {
+                type: 'doughnut',
+                data: { labels:['Pagos', 'Em Atraso'], datasets: [{ data:[85, 15], backgroundColor:['#10b981', '#ef4444'], borderWidth: 0 }] },
+                options: { cutout: '75%' }
+            });
+        }
+        window.onload = initCharts;
+    </script>
+</body>
+</html>
