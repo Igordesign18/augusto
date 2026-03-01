@@ -90,12 +90,10 @@
     }
     .sidebar-header .logo {
       width: 42px; height: 42px;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      background: transparent;
       border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 16px; color: #fff;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(234,88,12,.4);
     }
     .sidebar-header h1 { font-size: 16px; font-weight: 700; letter-spacing: -.3px; }
     .sidebar-header span { font-size: 11px; opacity: .5; display: block; margin-top: 2px; font-weight: 400; }
@@ -351,6 +349,9 @@
       background: var(--surface);
       transition: var(--transition);
     }
+    .form-group input[type="file"] {
+      padding: 7px 10px;
+    }
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
@@ -407,6 +408,12 @@
       color: #fff;
       box-shadow: 0 2px 8px rgba(220,38,38,.25);
     }
+    .btn-info {
+      background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(14,165,233,.25);
+    }
+    .btn-info:hover { box-shadow: 0 4px 12px rgba(14,165,233,.4); }
     .btn-outline {
       background: var(--surface);
       border: 1.5px solid var(--border);
@@ -415,6 +422,7 @@
     .btn-outline:hover { background: var(--border-light); border-color: var(--text-light); }
     .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: var(--radius-xs); }
     .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; } /* Added disabled state */
 
     /* ===== BADGES ===== */
     .badge {
@@ -603,30 +611,22 @@
       transition: opacity .3s;
     }
     .overlay-bg.open { display: block; }
-
-    /* ===== LOADING SHIMMER ===== */
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
   </style>
 </head>
 <body>
 
-<!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- Overlay for mobile sidebar -->
 <div class="overlay-bg" id="overlayBg" onclick="toggleSidebar()"></div>
 
-<!-- ===== APP SHELL ===== -->
 <div id="appShell">
 
-  <!-- SIDEBAR -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="logo">MC</div>
-      <div><h1>CréditoMais</h1><span>Sistema de Gest&atilde;o</span></div>
+      <div class="logo">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135679.png" alt="Logo MC" style="width: 100%; height: 100%; object-fit: contain;" />
+      </div>
+      <div><h1>MicroCred</h1><span>Sistema de Gest&atilde;o</span></div>
     </div>
     <div class="sidebar-nav">
       <div class="nav-section">Principal</div>
@@ -681,7 +681,6 @@
     </div>
   </nav>
 
-  <!-- MAIN CONTENT -->
   <div class="main">
     <header class="topbar">
       <div class="topbar-left">
@@ -698,7 +697,6 @@
 
     <div class="content">
 
-      <!-- ===== DASHBOARD ===== -->
       <div class="page-section active" id="page-dashboard">
         <div class="stats-grid" id="dashStats"></div>
         <div class="card">
@@ -725,7 +723,6 @@
         </div>
       </div>
 
-      <!-- ===== CLIENTES ===== -->
       <div class="page-section" id="page-clientes">
         <div class="card">
           <div class="card-header">
@@ -749,12 +746,14 @@
         </div>
       </div>
 
-      <!-- ===== AVALISTAS ===== -->
       <div class="page-section" id="page-avalistas">
         <div class="card">
           <div class="card-header">
             <h3>Avalistas</h3>
             <div class="search-bar">
+              <select id="filterAvalistaCliente" onchange="loadAvalistas()">
+                <option value="">Todos os Clientes</option>
+              </select>
               <input type="text" id="searchAvalistas" placeholder="Buscar avalista..." oninput="loadAvalistas()" />
               <button class="btn btn-primary" onclick="openAvalistaModal()">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
@@ -773,7 +772,6 @@
         </div>
       </div>
 
-      <!-- ===== MICRO NEGOCIOS ===== -->
       <div class="page-section" id="page-negocios">
         <div class="card">
           <div class="card-header">
@@ -797,7 +795,6 @@
         </div>
       </div>
 
-      <!-- ===== AVALIACAO FINANCEIRA ===== -->
       <div class="page-section" id="page-avaliacao">
         <div class="card">
           <div class="card-header">
@@ -818,7 +815,6 @@
         </div>
       </div>
 
-      <!-- ===== FLUXO DE CAIXA ===== -->
       <div class="page-section" id="page-fluxo">
         <div class="card">
           <div class="card-header">
@@ -839,7 +835,6 @@
         </div>
       </div>
 
-      <!-- ===== OPERACOES ===== -->
       <div class="page-section" id="page-operacoes">
         <div class="card">
           <div class="card-header">
@@ -872,7 +867,6 @@
         </div>
       </div>
 
-      <!-- ===== PARCELAS ===== -->
       <div class="page-section" id="page-parcelas">
         <div class="card">
           <div class="card-header">
@@ -898,7 +892,6 @@
         </div>
       </div>
 
-      <!-- ===== INADIMPLENCIA ===== -->
       <div class="page-section" id="page-inadimplencia">
         <div class="card">
           <div class="card-header">
@@ -919,7 +912,6 @@
         </div>
       </div>
 
-      <!-- ===== RENOVACOES ===== -->
       <div class="page-section" id="page-renovacoes">
         <div class="card">
           <div class="card-header">
@@ -940,7 +932,6 @@
         </div>
       </div>
 
-      <!-- ===== RELATORIOS ===== -->
       <div class="page-section" id="page-relatorios">
         <div class="tabs">
           <button class="tab active" onclick="switchReportTab(this,'repResumo')">Resumo Geral</button>
@@ -987,9 +978,6 @@
   </div>
 </div>
 
-<!-- ===== MODALS ===== -->
-
-<!-- Modal Cliente -->
 <div class="modal-overlay" id="modalCliente">
   <div class="modal">
     <div class="modal-header">
@@ -999,6 +987,9 @@
     <div class="modal-body">
       <input type="hidden" id="clienteId" />
       <div class="form-grid">
+        <div class="form-group"><label>Doc Frente (Opcional)</label><input type="file" id="cDocFrente" accept="image/*" /><input type="hidden" id="cDocFrenteUrl" /></div>
+        <div class="form-group"><label>Doc Verso (Opcional)</label><input type="file" id="cDocVerso" accept="image/*" /><input type="hidden" id="cDocVersoUrl" /></div>
+
         <div class="form-group"><label>Nome Completo</label><input type="text" id="cNome" /></div>
         <div class="form-group"><label>CPF</label><input type="text" id="cCpf" maxlength="14" oninput="maskCPF(this)" /></div>
         <div class="form-group"><label>RG</label><input type="text" id="cRg" /></div>
@@ -1024,12 +1015,11 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalCliente')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveCliente()">Salvar</button>
+      <button class="btn btn-primary" onclick="saveCliente()" id="btnSaveCliente">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- Modal Avalista -->
 <div class="modal-overlay" id="modalAvalista">
   <div class="modal">
     <div class="modal-header">
@@ -1039,6 +1029,8 @@
     <div class="modal-body">
       <input type="hidden" id="avalistaId" />
       <div class="form-grid">
+        <div class="form-group"><label>Foto de Perfil (Opcional)</label><input type="file" id="aFoto" accept="image/*" /><input type="hidden" id="aFotoUrl" /></div>
+
         <div class="form-group"><label>Cliente Vinculado</label><select id="aCliente"></select></div>
         <div class="form-group"><label>Nome Completo</label><input type="text" id="aNome" /></div>
         <div class="form-group"><label>CPF</label><input type="text" id="aCpf" maxlength="14" oninput="maskCPF(this)" /></div>
@@ -1059,12 +1051,11 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalAvalista')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveAvalista()">Salvar</button>
+      <button class="btn btn-primary" onclick="saveAvalista()" id="btnSaveAvalista">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- Modal Negocio -->
 <div class="modal-overlay" id="modalNegocio">
   <div class="modal">
     <div class="modal-header">
@@ -1076,10 +1067,11 @@
       <div class="form-grid">
         <div class="form-group"><label>Cliente</label><select id="nCliente"></select></div>
         <div class="form-group"><label>Nome Fantasia</label><input type="text" id="nNome" /></div>
-        <div class="form-group"><label>CNPJ</label><input type="text" id="nCnpj" /></div>
+        <div class="form-group"><label>CPF</label><input type="text" id="nCpf" maxlength="14" oninput="maskCPF(this)" /></div>
         <div class="form-group"><label>Atividade</label><input type="text" id="nAtiv" /></div>
         <div class="form-group"><label>Setor</label><select id="nSetor"><option value="">Selecione</option><option>Com&eacute;rcio</option><option>Servi&ccedil;os</option><option>Ind&uacute;stria</option><option>Agricultura</option><option>Outro</option></select></div>
-        <div class="form-group"><label>Tempo de Atividade (meses)</label><input type="number" id="nTempo" /></div>
+        <div class="form-group"><label>Data In&iacute;cio da Atividade</label><input type="date" id="nDataInicio" onchange="calcTempoAtividade()" /></div>
+        <div class="form-group"><label>Tempo em Opera&ccedil;&atilde;o</label><input type="text" id="nTempoCalculado" readonly style="background:var(--border-light);" placeholder="Selecione a data..." /></div>
         <div class="form-group"><label>Endere&ccedil;o Comercial</label><input type="text" id="nEnd" /></div>
         <div class="form-group"><label>N&uacute;mero</label><input type="text" id="nNum" /></div>
         <div class="form-group"><label>Bairro</label><input type="text" id="nBairro" /></div>
@@ -1101,7 +1093,6 @@
   </div>
 </div>
 
-<!-- Modal Avaliacao -->
 <div class="modal-overlay" id="modalAvaliacao">
   <div class="modal">
     <div class="modal-header">
@@ -1132,7 +1123,6 @@
   </div>
 </div>
 
-<!-- Modal Fluxo -->
 <div class="modal-overlay" id="modalFluxo">
   <div class="modal">
     <div class="modal-header">
@@ -1165,7 +1155,6 @@
   </div>
 </div>
 
-<!-- Modal Operacao -->
 <div class="modal-overlay" id="modalOperacao">
   <div class="modal">
     <div class="modal-header">
@@ -1199,7 +1188,6 @@
   </div>
 </div>
 
-<!-- Modal Pagar Parcela -->
 <div class="modal-overlay" id="modalPagarParcela">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
@@ -1223,7 +1211,6 @@
   </div>
 </div>
 
-<!-- Modal Renovacao -->
 <div class="modal-overlay" id="modalRenovacao">
   <div class="modal" style="max-width:540px;">
     <div class="modal-header">
@@ -1246,7 +1233,6 @@
   </div>
 </div>
 
-<!-- Modal Cobranca -->
 <div class="modal-overlay" id="modalCobranca">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
@@ -1304,7 +1290,7 @@
     relatorios: 'Relat\u00f3rios',
   };
 
-  function navigate(page) {
+  async function navigate(page) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     const el = document.getElementById('page-' + page);
@@ -1317,7 +1303,7 @@
     switch (page) {
       case 'dashboard': loadDashboard(); break;
       case 'clientes': loadClientes(); break;
-      case 'avalistas': loadAvalistas(); break;
+      case 'avalistas': await loadAvalistaClienteFilter(); loadAvalistas(); break;
       case 'negocios': loadNegocios(); break;
       case 'avaliacao': loadAvaliacoes(); break;
       case 'fluxo': loadFluxos(); break;
@@ -1366,6 +1352,22 @@
     };
     const label = (s || '').replace(/_/g, ' ');
     return `<span class="badge badge-${map[s] || 'neutral'}">${label.charAt(0).toUpperCase() + label.slice(1)}</span>`;
+  }
+
+  // UPLOAD DE ARQUIVOS SUPABASE STORAGE
+  async function uploadFileToSupabase(file, folderName) {
+    if (!file) return null;
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${folderName}/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+    
+    const { data, error } = await sb.storage.from('imagens').upload(fileName, file);
+    if (error) {
+      console.error('Erro no upload', error);
+      throw new Error('Falha ao enviar a imagem. Verifique as permissões do Storage.');
+    }
+    
+    const { data: publicUrlData } = sb.storage.from('imagens').getPublicUrl(fileName);
+    return publicUrlData.publicUrl;
   }
 
   async function loadClienteOptions(selectId, selectedId) {
@@ -1432,14 +1434,70 @@
     document.getElementById('tblClientes').innerHTML = clientesCache.map(c => `
       <tr>
         <td><strong>${c.nome}</strong></td><td>${c.cpf}</td><td>${c.celular || c.telefone || '-'}</td><td>${c.cidade || '-'}${c.uf ? '/' + c.uf : ''}</td><td>${statusBadge(c.status)}</td>
-        <td><div class="btn-group"><button class="btn btn-outline btn-sm" onclick="editCliente('${c.id}')">Editar</button><button class="btn btn-danger btn-sm" onclick="deleteCliente('${c.id}')">Excluir</button></div></td>
+        <td><div class="btn-group">
+          <button class="btn btn-info btn-sm" onclick="printCliente('${c.id}')">Imprimir</button>
+          <button class="btn btn-outline btn-sm" onclick="editCliente('${c.id}')">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCliente('${c.id}')">Excluir</button>
+        </div></td>
       </tr>
     `).join('') || '<tr><td colspan="6" class="empty-state">Nenhum cliente encontrado</td></tr>';
+  }
+
+  async function printCliente(id) {
+    const { data: c } = await sb.from('clientes').select('*').eq('id', id).single();
+    if (!c) { showToast('Cliente não encontrado para impressão', 'error'); return; }
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Ficha do Cliente - ${c.nome}</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; padding: 40px; color: #1c1917; line-height: 1.6; }
+            h1 { border-bottom: 2px solid #ea580c; color: #ea580c; padding-bottom: 10px; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th { text-align: left; padding: 12px; background: #faf7f5; border-bottom: 1px solid #e7e5e4; width: 30%; }
+            td { padding: 12px; border-bottom: 1px solid #e7e5e4; }
+            .doc-img { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 10px; border: 1px solid #ccc; display: block; }
+          </style>
+        </head>
+        <body>
+          <h1>Ficha de Cadastro: ${c.nome}</h1>
+          <table>
+            <tr><th>CPF</th><td>${c.cpf}</td></tr>
+            <tr><th>RG</th><td>${c.rg || '-'}</td></tr>
+            <tr><th>Data Nasc.</th><td>${fmtDate(c.data_nascimento)}</td></tr>
+            <tr><th>Estado Civil</th><td>${c.estado_civil || '-'}</td></tr>
+            <tr><th>Escolaridade</th><td>${c.escolaridade || '-'}</td></tr>
+            <tr><th>Telefone</th><td>${c.telefone || '-'}</td></tr>
+            <tr><th>Celular</th><td>${c.celular || '-'}</td></tr>
+            <tr><th>E-mail</th><td>${c.email || '-'}</td></tr>
+            <tr><th>Endereço Completo</th><td>${c.endereco || '-'}, ${c.numero || '-'} ${c.complemento ? ' - ' + c.complemento : ''}<br>${c.bairro || '-'} - ${c.cidade || '-'}/${c.uf || '-'} (CEP: ${c.cep || '-'})</td></tr>
+            <tr><th>Renda Mensal</th><td>${fmt(c.renda_mensal)}</td></tr>
+            <tr><th>Despesa Mensal</th><td>${fmt(c.despesa_mensal)}</td></tr>
+            <tr><th>Observações</th><td>${c.observacoes || '-'}</td></tr>
+          </table>
+          ${c.doc_frente ? `<h3>Documento (Frente)</h3><img src="${c.doc_frente}" class="doc-img"/>` : ''}
+          ${c.doc_verso ? `<h3>Documento (Verso)</h3><img src="${c.doc_verso}" class="doc-img"/>` : ''}
+          <script>
+            setTimeout(() => { window.print(); window.close(); }, 1500); // tempo para carregar as imagens
+          <\/script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   }
 
   function openClienteModal(c) {
     document.getElementById('modalClienteTitle').textContent = c ? 'Editar Cliente' : 'Novo Cliente';
     document.getElementById('clienteId').value = c ? c.id : '';
+    
+    // Limpar input de arquivo e setar url atual
+    document.getElementById('cDocFrente').value = '';
+    document.getElementById('cDocVerso').value = '';
+    document.getElementById('cDocFrenteUrl').value = c?.doc_frente || '';
+    document.getElementById('cDocVersoUrl').value = c?.doc_verso || '';
+
     document.getElementById('cNome').value = c?.nome || '';
     document.getElementById('cCpf').value = c?.cpf || '';
     document.getElementById('cRg').value = c?.rg || '';
@@ -1471,56 +1529,104 @@
 
   async function saveCliente() {
     const id = document.getElementById('clienteId').value;
-    const obj = {
-      nome: document.getElementById('cNome').value,
-      cpf: document.getElementById('cCpf').value,
-      rg: document.getElementById('cRg').value,
-      data_nascimento: document.getElementById('cNasc').value || null,
-      sexo: document.getElementById('cSexo').value,
-      estado_civil: document.getElementById('cEstCivil').value,
-      escolaridade: document.getElementById('cEscol').value,
-      telefone: document.getElementById('cTel').value,
-      celular: document.getElementById('cCel').value,
-      email: document.getElementById('cEmail').value,
-      cep: document.getElementById('cCep').value,
-      endereco: document.getElementById('cEnd').value,
-      numero: document.getElementById('cNum').value,
-      complemento: document.getElementById('cComp').value,
-      bairro: document.getElementById('cBairro').value,
-      cidade: document.getElementById('cCidade').value,
-      uf: document.getElementById('cUf').value,
-      renda_mensal: parseFloat(document.getElementById('cRenda').value) || 0,
-      despesa_mensal: parseFloat(document.getElementById('cDespesa').value) || 0,
-      status: document.getElementById('cStatus').value,
-      observacoes: document.getElementById('cObs').value,
-    };
-    if (!obj.nome || !obj.cpf) { showToast('Nome e CPF obrigat\u00f3rios', 'error'); return; }
-    const { error } = id ? await sb.from('clientes').update(obj).eq('id', id) : await sb.from('clientes').insert(obj);
-    if (error) { showToast('Erro: ' + error.message, 'error'); return; }
-    showToast(id ? 'Cliente atualizado!' : 'Cliente cadastrado!', 'success');
-    closeModal('modalCliente');
-    loadClientes();
+    const btnSave = document.getElementById('btnSaveCliente');
+    
+    if (!document.getElementById('cNome').value || !document.getElementById('cCpf').value) {
+      showToast('Nome e CPF obrigatórios', 'error'); return;
+    }
+
+    btnSave.textContent = 'Salvando...';
+    btnSave.disabled = true;
+
+    try {
+      // Pega as URLs antigas se não enviar arquivo novo
+      let urlFrente = document.getElementById('cDocFrenteUrl').value;
+      let urlVerso = document.getElementById('cDocVersoUrl').value;
+
+      // Se usuário selecionou arquivo novo, faz o upload e atualiza a variável da URL
+      const fileFrente = document.getElementById('cDocFrente').files[0];
+      if (fileFrente) urlFrente = await uploadFileToSupabase(fileFrente, 'clientes');
+
+      const fileVerso = document.getElementById('cDocVerso').files[0];
+      if (fileVerso) urlVerso = await uploadFileToSupabase(fileVerso, 'clientes');
+
+      const obj = {
+        nome: document.getElementById('cNome').value,
+        cpf: document.getElementById('cCpf').value,
+        rg: document.getElementById('cRg').value,
+        data_nascimento: document.getElementById('cNasc').value || null,
+        sexo: document.getElementById('cSexo').value,
+        estado_civil: document.getElementById('cEstCivil').value,
+        escolaridade: document.getElementById('cEscol').value,
+        telefone: document.getElementById('cTel').value,
+        celular: document.getElementById('cCel').value,
+        email: document.getElementById('cEmail').value,
+        cep: document.getElementById('cCep').value,
+        endereco: document.getElementById('cEnd').value,
+        numero: document.getElementById('cNum').value,
+        complemento: document.getElementById('cComp').value,
+        bairro: document.getElementById('cBairro').value,
+        cidade: document.getElementById('cCidade').value,
+        uf: document.getElementById('cUf').value,
+        renda_mensal: parseFloat(document.getElementById('cRenda').value) || 0,
+        despesa_mensal: parseFloat(document.getElementById('cDespesa').value) || 0,
+        status: document.getElementById('cStatus').value,
+        observacoes: document.getElementById('cObs').value,
+        doc_frente: urlFrente,
+        doc_verso: urlVerso,
+      };
+
+      const { error } = id ? await sb.from('clientes').update(obj).eq('id', id) : await sb.from('clientes').insert(obj);
+      if (error) throw error;
+      
+      showToast(id ? 'Cliente atualizado!' : 'Cliente cadastrado!', 'success');
+      closeModal('modalCliente');
+      loadClientes();
+
+    } catch (e) {
+      showToast('Erro: ' + e.message, 'error');
+    } finally {
+      btnSave.textContent = 'Salvar';
+      btnSave.disabled = false;
+    }
   }
 
   async function deleteCliente(id) {
     if (!confirm('Deseja realmente excluir este cliente?')) return;
     const { error } = await sb.from('clientes').delete().eq('id', id);
     if (error) { showToast('Erro: ' + error.message, 'error'); return; }
-    showToast('Cliente exclu\u00eddo', 'success');
+    showToast('Cliente excluído', 'success');
     loadClientes();
   }
 
   // =============================================
   // AVALISTAS
   // =============================================
+  async function loadAvalistaClienteFilter() {
+    const { data } = await sb.from('clientes').select('id,nome').order('nome');
+    const sel = document.getElementById('filterAvalistaCliente');
+    sel.innerHTML = '<option value="">Todos os Clientes</option>' + (data || []).map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+  }
+
   async function loadAvalistas() {
     const search = (document.getElementById('searchAvalistas')?.value || '').trim();
+    const filterCid = document.getElementById('filterAvalistaCliente')?.value; 
+    
     let q = sb.from('avalistas').select('*,cliente:clientes(nome)').order('nome');
+    
+    if (filterCid) q = q.eq('cliente_id', filterCid);
     if (search) q = q.or(`nome.ilike.%${search}%,cpf.ilike.%${search}%`);
+    
     const { data } = await q;
     document.getElementById('tblAvalistas').innerHTML = (data || []).map(a => `
       <tr>
-        <td><strong>${a.nome}</strong></td><td>${a.cpf}</td><td>${a.cliente?.nome || '-'}</td><td>${a.celular || a.telefone || '-'}</td><td>${a.parentesco || '-'}</td>
+        <td>
+          <div style="display:flex; align-items:center; gap:10px;">
+            ${a.foto_perfil ? `<img src="${a.foto_perfil}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;" />` : ''}
+            <strong>${a.nome}</strong>
+          </div>
+        </td>
+        <td>${a.cpf}</td><td>${a.cliente?.nome || '-'}</td><td>${a.celular || a.telefone || '-'}</td><td>${a.parentesco || '-'}</td>
         <td><div class="btn-group"><button class="btn btn-outline btn-sm" onclick="editAvalista('${a.id}')">Editar</button><button class="btn btn-danger btn-sm" onclick="deleteAvalista('${a.id}')">Excluir</button></div></td>
       </tr>
     `).join('') || '<tr><td colspan="6" class="empty-state">Nenhum avalista encontrado</td></tr>';
@@ -1530,6 +1636,10 @@
     document.getElementById('modalAvalistaTitle').textContent = a ? 'Editar Avalista' : 'Novo Avalista';
     await loadClienteOptions('aCliente', a?.cliente_id);
     document.getElementById('avalistaId').value = a?.id || '';
+    
+    document.getElementById('aFoto').value = '';
+    document.getElementById('aFotoUrl').value = a?.foto_perfil || ''; 
+    
     document.getElementById('aNome').value = a?.nome || '';
     document.getElementById('aCpf').value = a?.cpf || '';
     document.getElementById('aRg').value = a?.rg || '';
@@ -1555,42 +1665,103 @@
 
   async function saveAvalista() {
     const id = document.getElementById('avalistaId').value;
-    const obj = {
-      cliente_id: document.getElementById('aCliente').value || null,
-      nome: document.getElementById('aNome').value,
-      cpf: document.getElementById('aCpf').value,
-      rg: document.getElementById('aRg').value,
-      telefone: document.getElementById('aTel').value,
-      celular: document.getElementById('aCel').value,
-      email: document.getElementById('aEmail').value,
-      endereco: document.getElementById('aEnd').value,
-      numero: document.getElementById('aNum').value,
-      bairro: document.getElementById('aBairro').value,
-      cidade: document.getElementById('aCidade').value,
-      uf: document.getElementById('aUf').value,
-      cep: document.getElementById('aCep').value,
-      renda_mensal: parseFloat(document.getElementById('aRenda').value) || 0,
-      parentesco: document.getElementById('aParent').value,
-      observacoes: document.getElementById('aObs').value,
-    };
-    if (!obj.nome || !obj.cpf) { showToast('Nome e CPF obrigat\u00f3rios', 'error'); return; }
-    const { error } = id ? await sb.from('avalistas').update(obj).eq('id', id) : await sb.from('avalistas').insert(obj);
-    if (error) { showToast('Erro: ' + error.message, 'error'); return; }
-    showToast(id ? 'Avalista atualizado!' : 'Avalista cadastrado!', 'success');
-    closeModal('modalAvalista');
-    loadAvalistas();
+    const btnSave = document.getElementById('btnSaveAvalista');
+
+    if (!document.getElementById('aNome').value || !document.getElementById('aCpf').value) {
+      showToast('Nome e CPF obrigatórios', 'error'); return;
+    }
+
+    btnSave.textContent = 'Salvando...';
+    btnSave.disabled = true;
+
+    try {
+      let fotoUrl = document.getElementById('aFotoUrl').value;
+      const fileFoto = document.getElementById('aFoto').files[0];
+      if (fileFoto) fotoUrl = await uploadFileToSupabase(fileFoto, 'avalistas');
+
+      const obj = {
+        cliente_id: document.getElementById('aCliente').value || null,
+        nome: document.getElementById('aNome').value,
+        cpf: document.getElementById('aCpf').value,
+        rg: document.getElementById('aRg').value,
+        telefone: document.getElementById('aTel').value,
+        celular: document.getElementById('aCel').value,
+        email: document.getElementById('aEmail').value,
+        endereco: document.getElementById('aEnd').value,
+        numero: document.getElementById('aNum').value,
+        bairro: document.getElementById('aBairro').value,
+        cidade: document.getElementById('aCidade').value,
+        uf: document.getElementById('aUf').value,
+        cep: document.getElementById('aCep').value,
+        renda_mensal: parseFloat(document.getElementById('aRenda').value) || 0,
+        parentesco: document.getElementById('aParent').value,
+        observacoes: document.getElementById('aObs').value,
+        foto_perfil: fotoUrl,
+      };
+
+      const { error } = id ? await sb.from('avalistas').update(obj).eq('id', id) : await sb.from('avalistas').insert(obj);
+      if (error) throw error;
+
+      showToast(id ? 'Avalista atualizado!' : 'Avalista cadastrado!', 'success');
+      closeModal('modalAvalista');
+      loadAvalistas();
+    } catch (e) {
+      showToast('Erro: ' + e.message, 'error');
+    } finally {
+      btnSave.textContent = 'Salvar';
+      btnSave.disabled = false;
+    }
   }
 
   async function deleteAvalista(id) {
     if (!confirm('Excluir avalista?')) return;
     await sb.from('avalistas').delete().eq('id', id);
-    showToast('Avalista exclu\u00eddo', 'success');
+    showToast('Avalista excluído', 'success');
     loadAvalistas();
   }
 
   // =============================================
   // MICRO NEGOCIOS
   // =============================================
+  function calcTempoAtividade() {
+    const inputData = document.getElementById('nDataInicio').value;
+    const calcOutput = document.getElementById('nTempoCalculado');
+    if (!inputData) {
+      calcOutput.value = '';
+      return;
+    }
+    
+    const dataInicio = new Date(inputData);
+    const hoje = new Date();
+    
+    if (dataInicio > hoje) {
+      calcOutput.value = 'Data no futuro';
+      return;
+    }
+
+    let anos = hoje.getFullYear() - dataInicio.getFullYear();
+    let meses = hoje.getMonth() - dataInicio.getMonth();
+    let dias = hoje.getDate() - dataInicio.getDate();
+
+    if (dias < 0) {
+      meses--;
+      const ultimoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
+      dias += ultimoMes.getDate();
+    }
+    
+    if (meses < 0) {
+      anos--;
+      meses += 12;
+    }
+
+    const partes = [];
+    if (anos > 0) partes.push(`${anos} ano${anos > 1 ? 's' : ''}`);
+    if (meses > 0) partes.push(`${meses} mês${meses > 1 ? 'es' : ''}`);
+    if (dias > 0) partes.push(`${dias} dia${dias > 1 ? 's' : ''}`);
+
+    calcOutput.value = partes.length > 0 ? partes.join(', ') : 'Menos de 1 dia';
+  }
+
   async function loadNegocios() {
     const search = (document.getElementById('searchNegocios')?.value || '').trim();
     let q = sb.from('micro_negocios').select('*,cliente:clientes(nome)').order('nome_fantasia');
@@ -1609,10 +1780,12 @@
     await loadClienteOptions('nCliente', n?.cliente_id);
     document.getElementById('negocioId').value = n?.id || '';
     document.getElementById('nNome').value = n?.nome_fantasia || '';
-    document.getElementById('nCnpj').value = n?.cnpj || '';
+    document.getElementById('nCpf').value = n?.cpf || ''; 
     document.getElementById('nAtiv').value = n?.atividade || '';
     document.getElementById('nSetor').value = n?.setor || '';
-    document.getElementById('nTempo').value = n?.tempo_atividade || '';
+    document.getElementById('nDataInicio').value = n?.data_inicio || '';
+    calcTempoAtividade();
+
     document.getElementById('nEnd').value = n?.endereco_comercial || '';
     document.getElementById('nNum').value = n?.numero || '';
     document.getElementById('nBairro').value = n?.bairro || '';
@@ -1638,10 +1811,10 @@
     const obj = {
       cliente_id: document.getElementById('nCliente').value || null,
       nome_fantasia: document.getElementById('nNome').value,
-      cnpj: document.getElementById('nCnpj').value,
+      cpf: document.getElementById('nCpf').value, 
       atividade: document.getElementById('nAtiv').value,
       setor: document.getElementById('nSetor').value,
-      tempo_atividade: parseInt(document.getElementById('nTempo').value) || 0,
+      data_inicio: document.getElementById('nDataInicio').value || null, 
       endereco_comercial: document.getElementById('nEnd').value,
       numero: document.getElementById('nNum').value,
       bairro: document.getElementById('nBairro').value,
@@ -1657,15 +1830,15 @@
     };
     const { error } = id ? await sb.from('micro_negocios').update(obj).eq('id', id) : await sb.from('micro_negocios').insert(obj);
     if (error) { showToast('Erro: ' + error.message, 'error'); return; }
-    showToast(id ? 'Neg\u00f3cio atualizado!' : 'Neg\u00f3cio cadastrado!', 'success');
+    showToast(id ? 'Negócio atualizado!' : 'Negócio cadastrado!', 'success');
     closeModal('modalNegocio');
     loadNegocios();
   }
 
   async function deleteNegocio(id) {
-    if (!confirm('Excluir neg\u00f3cio?')) return;
+    if (!confirm('Excluir negócio?')) return;
     await sb.from('micro_negocios').delete().eq('id', id);
-    showToast('Neg\u00f3cio exclu\u00eddo', 'success');
+    showToast('Negócio excluído', 'success');
     loadNegocios();
   }
 
@@ -1677,15 +1850,15 @@
     document.getElementById('tblAvaliacao').innerHTML = (data || []).map(a => `
       <tr>
         <td>${a.cliente?.nome || '-'}</td><td>${fmt(a.renda_familiar)}</td><td>${fmt(a.capacidade_pagamento)}</td>
-        <td>${a.aprovado ? '<span class="badge badge-success">Sim</span>' : '<span class="badge badge-danger">N\u00e3o</span>'}</td>
+        <td>${a.aprovado ? '<span class="badge badge-success">Sim</span>' : '<span class="badge badge-danger">Não</span>'}</td>
         <td>${fmtDate(a.data_avaliacao)}</td>
         <td><div class="btn-group"><button class="btn btn-outline btn-sm" onclick="editAvaliacao('${a.id}')">Editar</button><button class="btn btn-danger btn-sm" onclick="deleteAvaliacao('${a.id}')">Excluir</button></div></td>
       </tr>
-    `).join('') || '<tr><td colspan="6" class="empty-state">Nenhuma avalia\u00e7\u00e3o encontrada</td></tr>';
+    `).join('') || '<tr><td colspan="6" class="empty-state">Nenhuma avaliação encontrada</td></tr>';
   }
 
   async function openAvaliacaoModal(a) {
-    document.getElementById('modalAvaliacaoTitle').textContent = a ? 'Editar Avalia\u00e7\u00e3o' : 'Nova Avalia\u00e7\u00e3o';
+    document.getElementById('modalAvaliacaoTitle').textContent = a ? 'Editar Avaliação' : 'Nova Avaliação';
     await loadClienteOptions('avCliente', a?.cliente_id);
     document.getElementById('avaliacaoId').value = a?.id || '';
     document.getElementById('avRendaFam').value = a?.renda_familiar || '';
@@ -1725,15 +1898,15 @@
     };
     const { error } = id ? await sb.from('avaliacao_financeira').update(obj).eq('id', id) : await sb.from('avaliacao_financeira').insert(obj);
     if (error) { showToast('Erro: ' + error.message, 'error'); return; }
-    showToast('Avalia\u00e7\u00e3o salva!', 'success');
+    showToast('Avaliação salva!', 'success');
     closeModal('modalAvaliacao');
     loadAvaliacoes();
   }
 
   async function deleteAvaliacao(id) {
-    if (!confirm('Excluir avalia\u00e7\u00e3o?')) return;
+    if (!confirm('Excluir avaliação?')) return;
     await sb.from('avaliacao_financeira').delete().eq('id', id);
-    showToast('Avalia\u00e7\u00e3o exclu\u00edda', 'success');
+    showToast('Avaliação excluída', 'success');
     loadAvaliacoes();
   }
 
@@ -1812,7 +1985,7 @@
   async function deleteFluxo(id) {
     if (!confirm('Excluir fluxo?')) return;
     await sb.from('fluxo_caixa').delete().eq('id', id);
-    showToast('Exclu\u00eddo', 'success');
+    showToast('Excluído', 'success');
     loadFluxos();
   }
 
@@ -1831,11 +2004,11 @@
         <td><strong>${o.numero_contrato || '-'}</strong></td><td>${o.cliente?.nome || '-'}</td><td>${fmt(o.valor_aprovado || o.valor_solicitado)}</td><td>${o.taxa_juros}%</td><td>${o.num_parcelas}x</td><td>${statusBadge(o.status)}</td><td>${fmtDate(o.data_contratacao)}</td>
         <td><div class="btn-group"><button class="btn btn-outline btn-sm" onclick="editOperacao('${o.id}')">Editar</button><button class="btn btn-success btn-sm" onclick="gerarParcelas('${o.id}')">Parcelas</button><button class="btn btn-danger btn-sm" onclick="deleteOperacao('${o.id}')">Excluir</button></div></td>
       </tr>
-    `).join('') || '<tr><td colspan="8" class="empty-state">Nenhuma opera\u00e7\u00e3o encontrada</td></tr>';
+    `).join('') || '<tr><td colspan="8" class="empty-state">Nenhuma operação encontrada</td></tr>';
   }
 
   async function openOperacaoModal(o) {
-    document.getElementById('modalOperacaoTitle').textContent = o ? 'Editar Opera\u00e7\u00e3o' : 'Nova Opera\u00e7\u00e3o';
+    document.getElementById('modalOperacaoTitle').textContent = o ? 'Editar Operação' : 'Nova Operação';
     await loadClienteOptions('opCliente', o?.cliente_id);
     document.getElementById('operacaoId').value = o?.id || '';
     document.getElementById('opContrato').value = o?.numero_contrato || '';
@@ -1894,7 +2067,7 @@
     };
     const { error } = id ? await sb.from('operacoes').update(obj).eq('id', id) : await sb.from('operacoes').insert(obj);
     if (error) { showToast('Erro: ' + error.message, 'error'); return; }
-    showToast('Opera\u00e7\u00e3o salva!', 'success');
+    showToast('Operação salva!', 'success');
     closeModal('modalOperacao');
     loadOperacoes();
   }
@@ -1923,7 +2096,7 @@
     const { data: inserted, error } = await sb.from('operacoes').insert(obj).select().single();
     if (error) { showToast('Erro: ' + error.message, 'error'); return; }
     await generateParcelsForOp(inserted);
-    showToast('Opera\u00e7\u00e3o salva e parcelas geradas!', 'success');
+    showToast('Operação salva e parcelas geradas!', 'success');
     closeModal('modalOperacao');
     loadOperacoes();
   }
@@ -1955,20 +2128,20 @@
   }
 
   async function gerarParcelas(opId) {
-    if (!confirm('Gerar parcelas? Parcelas existentes ser\u00e3o mantidas.')) return;
+    if (!confirm('Gerar parcelas? Parcelas existentes serão mantidas.')) return;
     const { data: op } = await sb.from('operacoes').select('*').eq('id', opId).single();
     if (!op) return;
     const { count } = await sb.from('parcelas').select('id', { count: 'exact', head: true }).eq('operacao_id', opId);
-    if (count > 0) { showToast('J\u00e1 existem parcelas para esta opera\u00e7\u00e3o', 'error'); return; }
+    if (count > 0) { showToast('Já existem parcelas para esta operação', 'error'); return; }
     await generateParcelsForOp(op);
     showToast('Parcelas geradas!', 'success');
   }
 
   async function deleteOperacao(id) {
-    if (!confirm('Excluir opera\u00e7\u00e3o e parcelas?')) return;
+    if (!confirm('Excluir operação e parcelas?')) return;
     await sb.from('parcelas').delete().eq('operacao_id', id);
     await sb.from('operacoes').delete().eq('id', id);
-    showToast('Opera\u00e7\u00e3o exclu\u00edda', 'success');
+    showToast('Operação excluída', 'success');
     loadOperacoes();
   }
 
@@ -2035,7 +2208,7 @@
         <td style="font-weight:700">${fmt(i.valor_total_devido)}</td><td>${statusBadge(i.status)}</td>
         <td><div class="btn-group"><button class="btn btn-outline btn-sm" onclick="openCobranca('${i.id}')">Cobrar</button><button class="btn btn-success btn-sm" onclick="resolverInadimplencia('${i.id}')">Resolver</button></div></td>
       </tr>
-    `).join('') || '<tr><td colspan="8" class="empty-state">Nenhum registro de inadimpl\u00eancia</td></tr>';
+    `).join('') || '<tr><td colspan="8" class="empty-state">Nenhum registro de inadimplência</td></tr>';
   }
 
   async function checkInadimplencia() {
@@ -2060,7 +2233,7 @@
         });
       }
     }
-    showToast('Inadimpl\u00eancia atualizada!', 'success');
+    showToast('Inadimplência atualizada!', 'success');
     loadInadimplencia();
   }
 
@@ -2078,7 +2251,7 @@
       data_contato: document.getElementById('cobData').value,
       resultado_contato: document.getElementById('cobResultado').value,
     }).eq('id', id);
-    showToast('Cobran\u00e7a registrada!', 'success');
+    showToast('Cobrança registrada!', 'success');
     closeModal('modalCobranca');
     loadInadimplencia();
   }
@@ -2098,11 +2271,11 @@
     document.getElementById('tblRenovacoes').innerHTML = (data || []).map(r => `
       <tr>
         <td>${r.cliente?.nome || '-'}</td><td>${r.op_orig?.numero_contrato || '-'}</td><td>${fmt(r.saldo_devedor)}</td><td>${fmt(r.valor_novo_emprestimo)}</td>
-        <td>${r.aprovado ? '<span class="badge badge-success">Sim</span>' : '<span class="badge badge-danger">N\u00e3o</span>'}</td>
+        <td>${r.aprovado ? '<span class="badge badge-success">Sim</span>' : '<span class="badge badge-danger">Não</span>'}</td>
         <td>${fmtDate(r.data_renovacao)}</td>
         <td><button class="btn btn-danger btn-sm" onclick="deleteRenovacao('${r.id}')">Excluir</button></td>
       </tr>
-    `).join('') || '<tr><td colspan="7" class="empty-state">Nenhuma renova\u00e7\u00e3o encontrada</td></tr>';
+    `).join('') || '<tr><td colspan="7" class="empty-state">Nenhuma renovação encontrada</td></tr>';
   }
 
   async function openRenovacaoModal() {
@@ -2136,15 +2309,15 @@
     };
     const { error } = await sb.from('renovacoes').insert(obj);
     if (error) { showToast('Erro: ' + error.message, 'error'); return; }
-    showToast('Renova\u00e7\u00e3o registrada!', 'success');
+    showToast('Renovação registrada!', 'success');
     closeModal('modalRenovacao');
     loadRenovacoes();
   }
 
   async function deleteRenovacao(id) {
-    if (!confirm('Excluir renova\u00e7\u00e3o?')) return;
+    if (!confirm('Excluir renovação?')) return;
     await sb.from('renovacoes').delete().eq('id', id);
-    showToast('Exclu\u00edda', 'success');
+    showToast('Excluída', 'success');
     loadRenovacoes();
   }
 
@@ -2175,7 +2348,7 @@
       <div class="stat-card accent"><div class="label">Total Desembolsado</div><div class="value">${fmt(totalDesembolsado)}</div></div>
       <div class="stat-card success"><div class="label">Total Recebido</div><div class="value">${fmt(totalRecebido)}</div></div>
       <div class="stat-card danger"><div class="label">Total em Atraso</div><div class="value">${fmt(totalAtrasado)}</div></div>
-      <div class="stat-card info"><div class="label">Taxa Inadimpl\u00eancia</div><div class="value">${taxaInadimplencia}%</div></div>
+      <div class="stat-card info"><div class="label">Taxa Inadimplência</div><div class="value">${taxaInadimplencia}%</div></div>
     `;
     const statusCount = {};
     ops.forEach(o => { statusCount[o.status] = (statusCount[o.status] || 0) + 1; });
@@ -2205,7 +2378,7 @@
     }
     document.getElementById('tblCarteira').innerHTML = rows.map(r => `
       <tr><td>${r.cliente?.nome || '-'}</td><td>${r.numero_contrato || '-'}</td><td>${fmt(r.valor_aprovado || r.valor_solicitado)}</td><td>${r.pagas}/${r.total}</td><td>${fmt(r.saldo)}</td><td>${statusBadge(r.status)}</td></tr>
-    `).join('') || '<tr><td colspan="6" class="empty-state">Nenhuma opera\u00e7\u00e3o ativa</td></tr>';
+    `).join('') || '<tr><td colspan="6" class="empty-state">Nenhuma operação ativa</td></tr>';
   }
 
   // =============================================
@@ -2243,4 +2416,3 @@
 
 </body>
 </html>
-
