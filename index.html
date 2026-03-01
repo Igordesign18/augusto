@@ -65,6 +65,7 @@
         .avatar { width: 40px; height: 40px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .content { flex: 1; overflow-y: auto; padding: 2rem; }
         
+        /* Views SPA */
         .view { display: none; animation: fadeIn 0.3s ease-in-out; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -74,42 +75,53 @@
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
         .card-title { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--primary); }
         
+        /* Grids */
         .grid-10 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
         .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
         @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
 
+        /* KPIs */
         .kpi-card { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
         .kpi-card h4 { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
         .kpi-card .value { font-size: 1.8rem; font-weight: 800; color: var(--text-main); }
         .kpi-card .value.green { color: var(--success); }
         .kpi-card .value.red { color: var(--danger); }
 
+        /* Formulários */
         .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
         .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
         .form-group input, .form-group select, .form-group textarea { padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; color: var(--text-main); outline: none; transition: 0.2s; background: #fff; }
         .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .form-group input[readonly] { background-color: var(--bg); font-weight: 600; color: var(--text-muted); cursor: not-allowed; }
         
         .section-divider { width: 100%; height: 1px; background: var(--border); margin: 2rem 0 1.5rem 0; position: relative; }
         .section-divider span { position: absolute; top: -10px; left: 15px; background: var(--surface); padding: 0 10px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
 
+        /* Botões */
         .btn { padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: #fff; }
         .btn-primary:hover { background: var(--primary-dark); }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
         .btn-danger { background: var(--danger); color: #fff; }
         .btn-success { background: var(--success); color: #fff; }
         
+        /* Tabelas */
         .table-container { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; white-space: nowrap; }
         th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
         th { background-color: #f9fafb; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
+        tbody tr:hover { background-color: #f9fafb; }
         
         .badge { padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
         .badge-green { background: #d1fae5; color: #065f46; }
         .badge-red { background: #fee2e2; color: #991b1b; }
         .badge-yellow { background: #fef3c7; color: #92400e; }
+        
+        .alert-box { padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+        .alert-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
     </style>
 </head>
 <body>
@@ -125,12 +137,15 @@
             <div class="menu-item" onclick="nav('financeiro')"><i class="fa-solid fa-calculator"></i> Avaliação Financeira</div>
             <div class="menu-item" onclick="nav('operacoes')"><i class="fa-solid fa-file-invoice-dollar"></i> Operações</div>
             <div class="menu-item" onclick="nav('parcelas')"><i class="fa-solid fa-calendar-check"></i> Parcelas</div>
+            <div class="menu-item" onclick="nav('inadimplencia')"><i class="fa-solid fa-triangle-exclamation"></i> Inadimplência</div>
+            <div class="menu-item" onclick="nav('renovacao')"><i class="fa-solid fa-rotate-right"></i> Renovação</div>
             <div class="menu-item" onclick="nav('relatorios')"><i class="fa-solid fa-file-pdf"></i> Relatórios</div>
         </div>
     </aside>
 
     <!-- ================= MAIN WRAPPER ================= -->
     <div class="main-wrapper">
+        <!-- TOPBAR -->
         <header class="topbar">
             <div>
                 <h2 id="header-title" style="font-size: 1.2rem;">Dashboard Geral</h2>
@@ -151,27 +166,25 @@
             <div id="view-dashboard" class="view active">
                 <div class="grid-10 mb-2">
                     <div class="kpi-card"><h4>Total Clientes BD</h4><div class="value" id="dash-tot-cli">...</div></div>
-                    <div class="kpi-card" style="border-color: var(--success)"><h4>Operações Ativas</h4><div class="value green">Em breve</div></div>
+                    <div class="kpi-card" style="border-color: var(--success)"><h4>Operações Ativas</h4><div class="value green">842</div></div>
                     <div class="kpi-card" style="border-color: var(--danger)"><h4>Inadimplência</h4><div class="value red">7.9%</div></div>
                     <div class="kpi-card"><h4>Ticket Médio</h4><div class="value">R$ 2.500</div></div>
                 </div>
                 
                 <div class="grid-2 mt-3">
-                    <div class="card"><div class="card-header"><span class="card-title"><i class="fa-solid fa-chart-column"></i> Volume Liberado</span></div><canvas id="chartOps"></canvas></div>
-                    <div class="card"><div class="card-header"><span class="card-title"><i class="fa-solid fa-chart-pie"></i> Inadimplência vs Pagos</span></div><canvas id="chartApprove"></canvas></div>
+                    <div class="card"><div class="card-header"><span class="card-title"><i class="fa-solid fa-chart-column"></i> Volume Liberado (R$)</span></div><canvas id="chartOps"></canvas></div>
+                    <div class="card"><div class="card-header"><span class="card-title"><i class="fa-solid fa-chart-pie"></i> Pagos vs Em Atraso</span></div><canvas id="chartApprove"></canvas></div>
                 </div>
             </div>
 
             <!-- ================= 2. CLIENTES ================= -->
             <div id="view-clientes" class="view">
                 
-                <!-- Formulário de Cadastro -->
+                <!-- Formulário -->
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title"><i class="fa-solid fa-user-plus"></i> Cadastro de Cliente no Supabase</span>
-                        <div class="flex gap-1">
-                            <button class="btn btn-primary" id="btn-salvar-cli" onclick="salvarCliente()"><i class="fa-solid fa-save"></i> Salvar Cliente</button>
-                        </div>
+                        <span class="card-title"><i class="fa-solid fa-user-plus"></i> Novo Cliente (Supabase)</span>
+                        <button class="btn btn-primary" id="btn-salvar-cli" onclick="salvarCliente()"><i class="fa-solid fa-save"></i> Salvar Cliente</button>
                     </div>
                     
                     <div class="grid-4">
@@ -180,15 +193,15 @@
                         <div class="form-group"><label>Data de Nascimento</label><input type="date" id="cli-nasc"></div>
                         
                         <div class="form-group"><label>Telefone / WhatsApp</label><input type="text" id="cli-tel"></div>
-                        <div class="form-group" style="grid-column: span 2;"><label>Endereço</label><input type="text" id="cli-end"></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Endereço Completo</label><input type="text" id="cli-end"></div>
                         <div class="form-group"><label>Score Interno</label><input type="number" id="cli-score" value="500"></div>
                     </div>
                 </div>
 
-                <!-- Tabela de Listagem em Tempo Real -->
+                <!-- Tabela BD -->
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title"><i class="fa-solid fa-table"></i> Clientes Cadastrados (Banco de Dados)</span>
+                        <span class="card-title"><i class="fa-solid fa-table"></i> Clientes Cadastrados (Real-Time BD)</span>
                         <button class="btn btn-outline" onclick="carregarClientes()"><i class="fa-solid fa-rotate-right"></i> Atualizar Tabela</button>
                     </div>
                     <div class="table-container">
@@ -209,10 +222,45 @@
                         </table>
                     </div>
                 </div>
-
             </div>
 
-            <!-- ================= 5. AVALIAÇÃO FINANCEIRA ================= -->
+            <!-- ================= 3. AVALISTAS ================= -->
+            <div id="view-avalistas" class="view">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fa-solid fa-handshake"></i> Cadastro de Avalista</span>
+                        <button class="btn btn-primary"><i class="fa-solid fa-save"></i> Salvar Avalista</button>
+                    </div>
+                    <div class="grid-4">
+                        <div class="form-group"><label>ID Cliente Vinculado</label><input type="text" placeholder="Buscar ID Cliente"></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Nome Completo do Avalista</label><input type="text"></div>
+                        <div class="form-group"><label>CPF</label><input type="text"></div>
+                        <div class="form-group"><label>Telefone</label><input type="text"></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Endereço Completo</label><input type="text"></div>
+                        <div class="form-group"><label>Renda Mensal (R$)</label><input type="number"></div>
+                        <div class="form-group"><label>Grau de Vínculo</label><input type="text" placeholder="Ex: Irmão, Amigo"></div>
+                        <div class="form-group"><label>Possui Restrição?</label><select><option>Não</option><option>Sim</option></select></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Observações</label><input type="text"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 4. MICRO NEGÓCIO ================= -->
+            <div id="view-negocios" class="view">
+                <div class="card">
+                    <div class="card-header"><span class="card-title"><i class="fa-solid fa-store"></i> Detalhamento do Micro Negócio</span><button class="btn btn-primary">Salvar Negócio</button></div>
+                    <div class="grid-4">
+                        <div class="form-group" style="grid-column: span 2;"><label>Nome do Negócio</label><input type="text"></div>
+                        <div class="form-group"><label>Segmento</label><input type="text" placeholder="Ex: Vestuário"></div>
+                        <div class="form-group"><label>Tempo de Atividade</label><input type="text"></div>
+                        <div class="form-group"><label>Possui CNPJ?</label><select><option>Não</option><option>Sim</option></select></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Local de Funcionamento (Endereço)</label><input type="text"></div>
+                        <div class="form-group"><label>Ticket Médio (R$)</label><input type="number"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 5. AVALIAÇÃO FINANCEIRA (Fluxo de Caixa) ================= -->
             <div id="view-financeiro" class="view">
                 <div class="grid-2">
                     <div class="card">
@@ -226,21 +274,20 @@
 
                         <div class="section-divider"><span>Despesas</span></div>
                         <div class="grid-2">
-                            <div class="form-group"><label>Custos Operacionais</label><input type="number" class="fin-calc" id="fin-op" value="0"></div>
-                            <div class="form-group"><label>Despesas Pessoais</label><input type="number" class="fin-calc" id="fin-pes" value="0"></div>
+                            <div class="form-group"><label>Custos Operacionais (Negócio)</label><input type="number" class="fin-calc" id="fin-op" value="0"></div>
+                            <div class="form-group"><label>Despesas Pessoais (Família)</label><input type="number" class="fin-calc" id="fin-pes" value="0"></div>
                         </div>
                     </div>
 
-                    <!-- Fluxo de Caixa Acoplado -->
                     <div class="card" style="background: var(--sidebar-bg); color: #fff;">
-                        <div class="card-header" style="border-color: rgba(255,255,255,0.1)"><span class="card-title" style="color:#fff"><i class="fa-solid fa-chart-pie"></i> Resultado Real</span></div>
+                        <div class="card-header" style="border-color: rgba(255,255,255,0.1)"><span class="card-title" style="color:#fff"><i class="fa-solid fa-chart-pie"></i> Resultado Real (Sobra de Caixa)</span></div>
                         
                         <div class="grid-2 mb-2">
                             <div class="form-group"><label style="color:#9ca3af">Receita Total</label><input type="text" id="fc-rec" readonly style="background: rgba(255,255,255,0.05); color:#fff;"></div>
                             <div class="form-group"><label style="color:#9ca3af">Despesa Total</label><input type="text" id="fc-desp-tot" readonly style="background: rgba(255,255,255,0.05); color:#ef4444; font-weight:bold;"></div>
                         </div>
 
-                        <div class="form-group mb-2"><label style="color:#10b981; font-size:1rem;">Lucro Líquido Real (Sobra)</label><input type="text" id="fc-lucro" readonly style="background: #064e3b; color:#34d399; font-size: 1.5rem; font-weight:800; border:none;"></div>
+                        <div class="form-group mb-2"><label style="color:#10b981; font-size:1rem;">Lucro Líquido Real</label><input type="text" id="fc-lucro" readonly style="background: #064e3b; color:#34d399; font-size: 1.5rem; font-weight:800; border:none;"></div>
                         
                         <div class="grid-2">
                             <div class="form-group">
@@ -248,6 +295,7 @@
                                 <select id="fc-margem" onchange="calcFinanceiro()" style="background: #1f2937; color:#fff; border-color:#374151;">
                                     <option value="0.30">30% (Conservador)</option>
                                     <option value="0.40" selected>40% (Padrão)</option>
+                                    <option value="0.50">50% (Agressivo)</option>
                                 </select>
                             </div>
                             <div class="form-group"><label style="color:#f59e0b">Capacidade Máx. Parcela</label><input type="text" id="fc-max-parc" readonly style="background: rgba(245, 158, 11, 0.1); color:#fcd34d; font-weight:bold;"></div>
@@ -263,26 +311,96 @@
                     
                     <div class="grid-4">
                         <div class="form-group"><label>Valor Aprovado (R$)</label><input type="number" id="op-val" oninput="calcOp()" style="background: #f0fdf4; border-color: #86efac;"></div>
-                        <div class="form-group"><label>Taxa de Juros (% a.m)</label><input type="number" step="0.1" id="op-tax" oninput="calcOp()"></div>
-                        <div class="form-group"><label>Prazo (Meses)</label><input type="number" id="op-prz" oninput="calcOp()"></div>
+                        <div class="form-group"><label>Taxa de Juros (% a.m)</label><input type="number" step="0.1" id="op-tax" oninput="calcOp()" value="3.5"></div>
+                        <div class="form-group"><label>Prazo (Meses)</label><input type="number" id="op-prz" oninput="calcOp()" value="12"></div>
+                        <div class="form-group"><label>Data 1º Vencimento</label><input type="date"></div>
                         
                         <div class="form-group"><label>Valor Parcela (Automático)</label><input type="text" id="op-parc-val" readonly style="color: var(--primary); font-weight: 800; font-size: 1.1rem;"></div>
                         <div class="form-group"><label>Juros Total</label><input type="text" id="op-juros" readonly style="color: var(--danger);"></div>
                         <div class="form-group"><label>Vlr Total Contrato</label><input type="text" id="op-total" readonly style="font-weight: bold;"></div>
+                        <div class="form-group"><label>Status</label><select><option>Em Análise</option><option>Aprovado</option></select></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Views vazias para estrutura -->
-            <div id="view-avalistas" class="view"><div class="card"><h3>Em Construção</h3></div></div>
-            <div id="view-negocios" class="view"><div class="card"><h3>Em Construção</h3></div></div>
-            <div id="view-parcelas" class="view"><div class="card"><h3>Em Construção</h3></div></div>
-            <div id="view-relatorios" class="view"><div class="card"><h3>Em Construção</h3></div></div>
+            <!-- ================= 7. PARCELAS ================= -->
+            <div id="view-parcelas" class="view">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fa-solid fa-list-check"></i> Controle de Parcelas e Juros Automático</span>
+                        <button class="btn btn-outline" onclick="calcAtrasos()"><i class="fa-solid fa-rotate"></i> Recalcular Atrasos (Hoje)</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="tbl-parcelas">
+                            <thead>
+                                <tr><th>OP</th><th>Parc</th><th>Vlr Orig.</th><th>Vencimento</th><th>Status</th><th>Dias Atraso</th><th>Multa+Juros</th><th>Vlr Atual</th><th>Ação</th></tr>
+                            </thead>
+                            <tbody>
+                                <!-- Injetado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 8. INADIMPLÊNCIA ================= -->
+            <div id="view-inadimplencia" class="view">
+                <div class="alert-box alert-danger">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <div style="font-size: 1.1rem;">Painel de Cobrança</div>
+                        <div style="font-size: 0.85rem; font-weight: 400;">Atrasos críticos mapeados. Multa de 2% e Juros de Mora de 1% a.m pro-rata.</div>
+                    </div>
+                </div>
+                <div class="grid-4 mb-2">
+                    <div class="kpi-card" style="border-left-color: var(--danger)"><h4>Total Inadimplente</h4><div class="value red">R$ 14.530</div></div>
+                    <div class="kpi-card"><h4>Dias Médios Atraso</h4><div class="value">22 Dias</div></div>
+                    <div class="kpi-card"><h4>Recuperação Mês</h4><div class="value green">R$ 3.200</div></div>
+                </div>
+            </div>
+
+            <!-- ================= 9. RENOVAÇÃO ================= -->
+            <div id="view-renovacao" class="view">
+                <div class="card">
+                    <div class="card-header"><span class="card-title"><i class="fa-solid fa-rotate-right"></i> Motor de Renovação de Crédito</span></div>
+                    <div class="grid-2">
+                        <div>
+                            <div class="form-group"><label>Buscar ID Cliente</label><div class="flex gap-1"><input type="text" value="CLI-202511" style="flex:1"><button class="btn btn-outline">Analisar</button></div></div>
+                            <div class="mt-3 p-3" style="background: var(--bg); border-radius: 8px;">
+                                <p class="text-sm mb-2">Operações Quitadas: <strong>2</strong></p>
+                                <p class="text-sm mb-2">Score Comportamental: <strong class="text-success">920 / Excelência</strong></p>
+                                <p class="text-sm">Aumento Limite Sugerido: <strong class="text-primary">+ 35%</strong></p>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group"><label>Crédito Atual Base (R$)</label><input type="number" value="3000" readonly></div>
+                            <div class="form-group"><label>Limite Pré-Aprovado (+35%)</label><input type="text" value="R$ 4.050,00" readonly style="color: var(--success); font-weight: bold;"></div>
+                            <button class="btn btn-primary mt-2"><i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Proposta</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 10. RELATÓRIOS ================= -->
+            <div id="view-relatorios" class="view">
+                <div class="grid-3">
+                    <div class="card" style="text-align: center;">
+                        <i class="fa-solid fa-users text-primary" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                        <h3>Carteira de Clientes</h3>
+                        <div class="flex gap-1 justify-center mt-2"><button class="btn btn-outline"><i class="fa-solid fa-file-pdf"></i> PDF</button><button class="btn btn-outline"><i class="fa-solid fa-file-excel text-success"></i> Excel</button></div>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <i class="fa-solid fa-money-bill-transfer text-success" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                        <h3>Fluxo Financeiro</h3>
+                        <div class="flex gap-1 justify-center mt-2"><button class="btn btn-outline"><i class="fa-solid fa-file-pdf"></i> PDF</button><button class="btn btn-outline"><i class="fa-solid fa-file-excel text-success"></i> Excel</button></div>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </div>
 
-    <!-- ================= INTEGRAÇÃO SUPABASE & JAVASCRIPT LOGIC ================= -->
+    <!-- ================= JAVASCRIPT ================= -->
     <script>
         // 1. INICIALIZAÇÃO DO SUPABASE
         const supabaseUrl = 'https://hrnekdzkdapqeaydzcpo.supabase.co';
@@ -293,13 +411,20 @@
         async function testarConexao() {
             try {
                 const { count, error } = await supabase.from('clientes').select('*', { count: 'exact', head: true });
-                if (!error) {
-                    document.getElementById('db-status').innerText = "Online";
-                    document.getElementById('db-status').className = "text-success";
-                    document.getElementById('dash-tot-cli').innerText = count || 0;
+                
+                if (error) {
+                    console.error("Erro do Banco:", error.message);
+                    document.getElementById('db-status').innerText = "Erro Tabela (Execute o SQL)";
+                    document.getElementById('db-status').className = "text-danger";
+                    return;
                 }
+
+                document.getElementById('db-status').innerText = "Online";
+                document.getElementById('db-status').className = "text-success";
+                document.getElementById('dash-tot-cli').innerText = count || 0;
+                
             } catch (err) {
-                console.error("Erro Supabase:", err);
+                console.error("Erro JS:", err);
                 document.getElementById('db-status').innerText = "Erro BD";
                 document.getElementById('db-status').className = "text-danger";
             }
@@ -314,14 +439,15 @@
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById('view-' + viewId).classList.add('active');
 
-            const titles = { 'dashboard': 'Dashboard', 'clientes': 'Clientes', 'avalistas': 'Avalistas', 'negocios': 'Negócios', 'financeiro': 'Financeiro', 'operacoes': 'Operações', 'parcelas': 'Parcelas', 'relatorios': 'Relatórios' };
+            const titles = { 'dashboard': 'Dashboard', 'clientes': 'Clientes', 'avalistas': 'Avalistas', 'negocios': 'Negócios', 'financeiro': 'Financeiro', 'operacoes': 'Operações', 'parcelas': 'Parcelas', 'inadimplencia': 'Inadimplência', 'renovacao': 'Renovação', 'relatorios': 'Relatórios' };
             document.getElementById('header-title').innerText = titles[viewId];
 
             if(viewId === 'dashboard' && !window.chartsRendered) initCharts();
-            if(viewId === 'clientes') carregarClientes(); // Carrega tabela automaticamente ao abrir aba
+            if(viewId === 'clientes') carregarClientes(); 
+            if(viewId === 'parcelas') calcAtrasos(); 
         }
 
-        // 3. SALVAR CLIENTE (INSERT NO SUPABASE)
+        // 3. SALVAR CLIENTE
         async function salvarCliente() {
             const btn = document.getElementById('btn-salvar-cli');
             const nome = document.getElementById('cli-nome').value;
@@ -331,104 +457,63 @@
             const end = document.getElementById('cli-end').value;
             const score = document.getElementById('cli-score').value || 0;
 
-            if (!nome || !cpf) {
-                alert("Nome e CPF são obrigatórios!");
-                return;
-            }
+            if (!nome || !cpf) return alert("Nome e CPF são obrigatórios!");
 
-            // Animação do botão
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando no Supabase...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando no BD...';
             btn.disabled = true;
 
             const { data, error } = await supabase
                 .from('clientes')
-                .insert([
-                    { 
-                        nome_completo: nome, 
-                        cpf: cpf, 
-                        data_nascimento: nasc || null,
-                        telefone: tel,
-                        rua: end,
-                        score_interno: parseInt(score)
-                    }
-                ]);
+                .insert([{ nome_completo: nome, cpf: cpf, data_nascimento: nasc || null, telefone: tel, rua: end, score_interno: parseInt(score) }]);
 
             btn.innerHTML = '<i class="fa-solid fa-save"></i> Salvar Cliente';
             btn.disabled = false;
 
             if (error) {
-                alert("Erro ao salvar: " + error.message);
-                console.error(error);
+                alert("Erro ao salvar: Verifique se a tabela foi criada no Supabase.\n" + error.message);
             } else {
-                alert("Cliente registrado com sucesso no Banco de Dados!");
-                
-                // Limpa campos
-                document.getElementById('cli-nome').value = '';
-                document.getElementById('cli-cpf').value = '';
-                document.getElementById('cli-nasc').value = '';
-                document.getElementById('cli-tel').value = '';
-                document.getElementById('cli-end').value = '';
-                
-                carregarClientes(); // Atualiza a tabela na tela
-                testarConexao();    // Atualiza o KPI do dashboard
+                alert("Cliente registrado com sucesso!");['cli-nome', 'cli-cpf', 'cli-nasc', 'cli-tel', 'cli-end'].forEach(id => document.getElementById(id).value = '');
+                carregarClientes();
+                testarConexao();    
             }
         }
 
-        // 4. LER CLIENTES (SELECT DO SUPABASE)
+        // 4. LER CLIENTES
         async function carregarClientes() {
             const tbody = document.getElementById('tbody-clientes');
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center"><i class="fa-solid fa-spinner fa-spin"></i> Buscando no banco de dados...</td></tr>';
 
-            const { data, error } = await supabase
-                .from('clientes')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(20); // Busca os últimos 20
+            const { data, error } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }).limit(20);
 
-            if (error) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Erro ao carregar: ${error.message}</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = '';
+            if (error) return tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Erro: ${error.message}</td></tr>`;
             
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Nenhum cliente cadastrado ainda.</td></tr>';
-                return;
-            }
+            tbody.innerHTML = '';
+            if (data.length === 0) return tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Nenhum cliente cadastrado ainda.</td></tr>';
 
             data.forEach(cliente => {
-                const dataFormatada = new Date(cliente.created_at).toLocaleDateString('pt-BR');
-                const badge = cliente.score_interno > 600 ? 'badge-green' : 'badge-yellow';
-                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${dataFormatada}</td>
+                    <td>${new Date(cliente.created_at).toLocaleDateString('pt-BR')}</td>
                     <td class="font-bold">${cliente.nome_completo}</td>
                     <td>${cliente.cpf}</td>
                     <td>${cliente.telefone || '-'}</td>
-                    <td><span class="badge ${badge}">${cliente.score_interno}</span></td>
-                    <td>
-                        <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger)" onclick="deletarCliente('${cliente.id}')"><i class="fa-solid fa-trash"></i></button>
-                    </td>
+                    <td><span class="badge ${cliente.score_interno > 600 ? 'badge-green' : 'badge-yellow'}">${cliente.score_interno}</span></td>
+                    <td><button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger)" onclick="deletarCliente('${cliente.id}')"><i class="fa-solid fa-trash"></i></button></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // 4.1 DELETAR CLIENTE (DELETE NO SUPABASE)
+        // 4.1 DELETAR CLIENTE
         async function deletarCliente(id) {
-            if(confirm("Tem certeza que deseja apagar este cliente do Banco de Dados?")) {
+            if(confirm("Deseja apagar este cliente do Banco de Dados?")) {
                 const { error } = await supabase.from('clientes').delete().eq('id', id);
                 if(error) alert("Erro ao deletar: " + error.message);
-                else {
-                    carregarClientes();
-                    testarConexao();
-                }
+                else { carregarClientes(); testarConexao(); }
             }
         }
 
-        // 5. CÁLCULO FINANCEIRO E FLUXO DE CAIXA
+        // 5. CÁLCULO FINANCEIRO
         const formataBRL = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
         function calcFinanceiro() {
@@ -436,7 +521,6 @@
             const rec = getV('fin-fat') + getV('fin-out-ren');
             const totalDesp = getV('fin-op') + getV('fin-pes');
             const lucro = rec - totalDesp;
-            
             const margem = parseFloat(document.getElementById('fc-margem').value);
             const capacidade = lucro > 0 ? (lucro * margem) : 0;
 
@@ -447,7 +531,7 @@
         }
         document.querySelectorAll('.fin-calc').forEach(el => el.addEventListener('input', calcFinanceiro));
 
-        // 6. CÁLCULO PRICE DE EMPRÉSTIMO
+        // 6. CÁLCULO PRICE (OPERAÇÃO)
         function calcOp() {
             const val = parseFloat(document.getElementById('op-val').value) || 0;
             const prz = parseInt(document.getElementById('op-prz').value) || 0;
@@ -456,7 +540,6 @@
             if (val > 0 && prz > 0 && tax > 0) {
                 const pmt = val * (tax * Math.pow((1 + tax), prz)) / (Math.pow((1 + tax), prz) - 1);
                 const total = pmt * prz;
-                
                 document.getElementById('op-parc-val').value = formataBRL(pmt);
                 document.getElementById('op-total').value = formataBRL(total);
                 document.getElementById('op-juros').value = formataBRL(total - val);
@@ -464,22 +547,74 @@
                 document.getElementById('op-parc-val').value = "R$ 0,00";
             }
         }
+        
+        // 7. CÁLCULO DE ATRASOS (MOCK TABELA PARCELAS)
+        function calcAtrasos() {
+            const tbody = document.querySelector('#tbl-parcelas tbody');
+            tbody.innerHTML = '';
+            const HOJE = new Date(); // Data real de hoje
 
-        // 7. GRÁFICOS (Chart.js Mocks para estética do dashboard)
+            const parcelasMock =[
+                { op: 'OP-1001', num: '1/5', vlr: 450, venc: new Date(HOJE.getFullYear(), HOJE.getMonth()-1, HOJE.getDate()).toISOString().split('T')[0], status: 'Pago' },
+                { op: 'OP-1001', num: '2/5', vlr: 450, venc: new Date(HOJE.getFullYear(), HOJE.getMonth(), HOJE.getDate()-10).toISOString().split('T')[0], status: 'Pendente' }, // Vencido há 10 dias
+                { op: 'OP-1001', num: '3/5', vlr: 450, venc: new Date(HOJE.getFullYear(), HOJE.getMonth()+1, HOJE.getDate()).toISOString().split('T')[0], status: 'Pendente' }
+            ];
+
+            parcelasMock.forEach(p => {
+                const dtVenc = new Date(p.venc + 'T00:00:00');
+                let diasAtraso = 0;
+                let multaJuros = 0;
+                let vlrAtual = p.vlr;
+
+                if (p.status === 'Pendente' && dtVenc < HOJE) {
+                    const diffTime = Math.abs(HOJE - dtVenc);
+                    diasAtraso = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const multa = p.vlr * 0.02; // Multa Fixa 2%
+                    const jurosPorDia = (p.vlr * 0.01) / 30; // Juros 1% a.m pro rata
+                    multaJuros = multa + (jurosPorDia * diasAtraso);
+                    vlrAtual = p.vlr + multaJuros;
+                }
+
+                let badge = p.status === 'Pago' ? 'badge-green' : (diasAtraso > 0 ? 'badge-red' : 'badge-yellow');
+                let txtSt = diasAtraso > 0 && p.status !== 'Pago' ? 'Atrasado' : (p.status==='Pendente'?'A Vencer':p.status);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="font-bold">${p.op}</td><td>${p.num}</td><td>${formataBRL(p.vlr)}</td>
+                    <td>${dtVenc.toLocaleDateString('pt-BR')}</td><td><span class="badge ${badge}">${txtSt}</span></td>
+                    <td class="${diasAtraso>0?'text-danger font-bold':''}">${diasAtraso > 0 ? diasAtraso+' d' : '-'}</td>
+                    <td class="${multaJuros>0?'text-danger':''}">${multaJuros > 0 ? formataBRL(multaJuros) : '-'}</td>
+                    <td class="font-bold text-primary">${formataBRL(vlrAtual)}</td>
+                    <td>${p.status !== 'Pago' ? `<button class="btn btn-success" style="padding:0.3rem 0.6rem; font-size:0.8rem">Baixar</button>` : `-`}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 8. GRÁFICOS (CHART.JS CORRIGIDO)
         function initCharts() {
             window.chartsRendered = true;
             Chart.defaults.font.family = 'Inter';
+            
             new Chart(document.getElementById('chartOps'), {
                 type: 'bar',
-                data: { labels:['Set', 'Out', 'Nov', 'Dez', 'Jan', 'Fev'], datasets:[{ label: 'Liberado (R$)', data:[120k, 150k, 135k, 180k, 160k, 210k], backgroundColor: '#FF6B00', borderRadius: 4 }] }
+                data: { 
+                    labels:['Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'], 
+                    datasets:[{ label: 'Liberado (R$)', data:[120000, 150000, 135000, 180000, 160000, 210000], backgroundColor: '#FF6B00', borderRadius: 4 }] 
+                }
             });
+            
             new Chart(document.getElementById('chartApprove'), {
                 type: 'doughnut',
-                data: { labels:['Pagos', 'Em Atraso'], datasets: [{ data:[85, 15], backgroundColor:['#10b981', '#ef4444'], borderWidth: 0 }] },
+                data: { 
+                    labels:['Pagos no Prazo', 'Em Atraso'], 
+                    datasets: [{ data:[85, 15], backgroundColor:['#10b981', '#ef4444'], borderWidth: 0 }] 
+                },
                 options: { cutout: '75%' }
             });
         }
-        window.onload = initCharts;
+        
+        window.onload = () => { initCharts(); calcOp(); };
     </script>
 </body>
 </html>
