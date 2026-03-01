@@ -3,618 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CreditoMais | Core Bancário Interno</title>
+    <title>CreditoMais | Sistema Administrativo</title>
     
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B00',
+                        primaryHover: '#E66000',
+                        graphite: '#2D3748',
+                        lightbg: '#F7FAFC'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SUPABASE JS (Oficial) -->
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* ================= VARIÁVEIS DE TEMA ================= */
-        :root {
-            --primary: #FF6B00;
-            --primary-dark: #cc5600;
-            --primary-light: #fff0e6;
-            --sidebar-bg: #111827; 
-            --sidebar-hover: #1f2937;
-            --bg: #f3f4f6;
-            --surface: #ffffff;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --radius: 8px;
-        }
-
-        /* ================= BASE ================= */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { display: flex; height: 100vh; background-color: var(--bg); color: var(--text-main); overflow: hidden; }
-        
-        h1, h2, h3, h4 { color: var(--text-main); }
-        .text-primary { color: var(--primary); }
-        .text-success { color: var(--success); }
-        .text-danger { color: var(--danger); }
-        .font-bold { font-weight: 700; }
-        .text-sm { font-size: 0.875rem; }
-        .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mt-3 { margin-top: 1.5rem; }
-        .mb-2 { margin-bottom: 1rem; }
-        .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
-        .gap-1 { gap: 0.5rem; } .gap-2 { gap: 1rem; }
-        
-        /* ================= SIDEBAR ================= */
-        .sidebar { width: 260px; background: var(--sidebar-bg); display: flex; flex-direction: column; color: #fff; flex-shrink: 0; transition: 0.3s; z-index: 100; }
-        .brand { padding: 1.5rem; font-size: 1.5rem; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; }
-        .brand span { color: var(--primary); }
-        .menu-container { flex: 1; overflow-y: auto; padding: 1rem 0; }
-        .menu-item { padding: 0.8rem 1.5rem; display: flex; align-items: center; gap: 12px; color: #9ca3af; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; font-size: 0.95rem; font-weight: 500; }
-        .menu-item:hover, .menu-item.active { background: var(--sidebar-hover); color: #fff; border-left-color: var(--primary); }
-        .menu-item i { width: 20px; text-align: center; }
-
-        /* ================= MAIN LAYOUT ================= */
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .topbar { background: var(--surface); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); z-index: 10; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 40px; height: 40px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .content { flex: 1; overflow-y: auto; padding: 2rem; }
-        
-        /* Views SPA */
-        .view { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .view.active { display: block; }
+        body { font-family: 'Inter', sans-serif; background-color: #F7FAFC; }
+        .menu-item.active { background-color: #FF6B00; color: white; }
+        .menu-item.active i { color: white; }
+        .section-view { display: none; }
+        .section-view.active { display: block; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* ================= COMPONENTES ================= */
-        .card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
-        .card-title { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--primary); }
-        
-        /* Grids */
-        .grid-10 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-        @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
-
-        /* KPIs */
-        .kpi-card { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
-        .kpi-card h4 { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
-        .kpi-card .value { font-size: 1.8rem; font-weight: 800; color: var(--text-main); }
-        .kpi-card .value.green { color: var(--success); }
-        .kpi-card .value.red { color: var(--danger); }
-
-        /* Formulários */
-        .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
-        .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
-        .form-group input, .form-group select, .form-group textarea { padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; color: var(--text-main); outline: none; transition: 0.2s; background: #fff; }
-        .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
-        .form-group input[readonly] { background-color: var(--bg); font-weight: 600; color: var(--text-muted); cursor: not-allowed; }
-        
-        .section-divider { width: 100%; height: 1px; background: var(--border); margin: 2rem 0 1.5rem 0; position: relative; }
-        .section-divider span { position: absolute; top: -10px; left: 15px; background: var(--surface); padding: 0 10px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
-
-        /* Botões */
-        .btn { padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
-        .btn-primary { background: var(--primary); color: #fff; }
-        .btn-primary:hover { background: var(--primary-dark); }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
-        .btn-danger { background: var(--danger); color: #fff; }
-        .btn-success { background: var(--success); color: #fff; }
-        
-        /* Tabelas */
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        th { background-color: #f9fafb; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
-        tbody tr:hover { background-color: #f9fafb; }
-        
-        .badge { padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
-        .badge-green { background: #d1fae5; color: #065f46; }
-        .badge-red { background: #fee2e2; color: #991b1b; }
-        .badge-yellow { background: #fef3c7; color: #92400e; }
-        
-        .alert-box { padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-weight: 600; }
-        .alert-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        /* Estilo para inputs de formulário */
+        .input-fintech { width: 100%; padding: 0.75rem; border: 1px solid #E2E8F0; border-radius: 0.5rem; outline: none; transition: border 0.2s; background: #fff;}
+        .input-fintech:focus { border-color: #FF6B00; box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1); }
+        .label-fintech { display: block; font-size: 0.875rem; font-weight: 500; color: #4A5568; margin-bottom: 0.25rem; margin-top: 1rem;}
     </style>
 </head>
-<body>
+<body class="flex h-screen overflow-hidden text-gray-800">
 
-    <!-- ================= SIDEBAR ================= -->
-    <aside class="sidebar">
-        <div class="brand"><i class="fa-solid fa-layer-group"></i> Credito<span>Mais</span></div>
-        <div class="menu-container">
-            <div class="menu-item active" onclick="nav('dashboard')"><i class="fa-solid fa-chart-line"></i> Dashboard</div>
-            <div class="menu-item" onclick="nav('clientes')"><i class="fa-solid fa-users"></i> Clientes</div>
-            <div class="menu-item" onclick="nav('avalistas')"><i class="fa-solid fa-handshake"></i> Avalistas</div>
-            <div class="menu-item" onclick="nav('negocios')"><i class="fa-solid fa-store"></i> Micro Negócios</div>
-            <div class="menu-item" onclick="nav('financeiro')"><i class="fa-solid fa-calculator"></i> Avaliação Financeira</div>
-            <div class="menu-item" onclick="nav('operacoes')"><i class="fa-solid fa-file-invoice-dollar"></i> Operações</div>
-            <div class="menu-item" onclick="nav('parcelas')"><i class="fa-solid fa-calendar-check"></i> Parcelas</div>
-            <div class="menu-item" onclick="nav('inadimplencia')"><i class="fa-solid fa-triangle-exclamation"></i> Inadimplência</div>
-            <div class="menu-item" onclick="nav('renovacao')"><i class="fa-solid fa-rotate-right"></i> Renovação</div>
-            <div class="menu-item" onclick="nav('relatorios')"><i class="fa-solid fa-file-pdf"></i> Relatórios</div>
+    <aside class="w-64 bg-graphite text-gray-300 flex flex-col h-full shadow-xl z-20 transition-all">
+        <div class="p-6 flex items-center gap-3 border-b border-gray-700">
+            <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary/30">
+                C+
+            </div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Credito<span class="text-primary">Mais</span></h1>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-4 custom-scrollbar">
+            <nav class="space-y-1 px-3">
+                <a href="#" onclick="showSection('dashboard')" class="menu-item active flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-squares-four text-xl"></i> Dashboard
+                </a>
+                <a href="#" onclick="showSection('clientes')" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-users text-xl"></i> Clientes
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-shield-check text-xl"></i> Avalistas
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-storefront text-xl"></i> Micro Negócios
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-chart-line-up text-xl"></i> Avaliação Financeira
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-arrows-down-up text-xl"></i> Fluxo de Caixa
+                </a>
+                <a href="#" onclick="showSection('operacoes')" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-hand-coins text-xl"></i> Operações
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-calendar-check text-xl"></i> Parcelas
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-warning-circle text-xl"></i> Inadimplência
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-arrows-clockwise text-xl"></i> Renovação
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-file-text text-xl"></i> Relatórios
+                </a>
+                <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class="ph ph-export text-xl"></i> Exportações
+                </a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-700 text-sm text-center">
+            <span class="text-gray-500">CreditoMais © 2026</span><br>
+            <span class="text-green-400 text-xs flex items-center justify-center gap-1 mt-1"><i class="ph-fill ph-circle"></i> Sistema Online</span>
         </div>
     </aside>
 
-    <!-- ================= MAIN WRAPPER ================= -->
-    <div class="main-wrapper">
-        <!-- TOPBAR -->
-        <header class="topbar">
-            <div>
-                <h2 id="header-title" style="font-size: 1.2rem;">Dashboard Geral</h2>
-                <p class="text-sm text-muted">Gestão Conectada ao Supabase</p>
-            </div>
-            <div class="user-info">
-                <div style="text-align: right;">
-                    <p class="font-bold text-sm" style="margin: 0;"><span id="db-status" class="text-warning">Conectando...</span></p>
-                    <p class="text-muted" style="font-size: 0.75rem; margin: 0;">PostgreSQL (Supabase)</p>
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-10">
+            <h2 id="page-title" class="text-xl font-semibold text-gray-800">Visão Geral</h2>
+            <div class="flex items-center gap-6">
+                <button class="relative text-gray-500 hover:text-primary transition">
+                    <i class="ph ph-bell text-2xl"></i>
+                    <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                <div class="flex items-center gap-3 border-l pl-6 border-gray-200">
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-800">Admin</p>
+                        <p class="text-xs text-gray-500">Diretoria</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+                        <i class="ph ph-user text-xl"></i>
+                    </div>
                 </div>
-                <div class="avatar"><i class="fa-solid fa-database"></i></div>
             </div>
         </header>
 
-        <div class="content">
+        <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
 
-            <!-- ================= 1. DASHBOARD ================= -->
-            <div id="view-dashboard" class="view active">
-                <div class="grid-10 mb-2">
-                    <div class="kpi-card"><h4>Total Clientes BD</h4><div class="value" id="dash-tot-cli">...</div></div>
-                    <div class="kpi-card" style="border-color: var(--success)"><h4>Operações Ativas</h4><div class="value green">842</div></div>
-                    <div class="kpi-card" style="border-color: var(--danger)"><h4>Inadimplência</h4><div class="value red">7.9%</div></div>
-                    <div class="kpi-card"><h4>Ticket Médio</h4><div class="value">R$ 2.500</div></div>
-                </div>
+            <section id="dashboard" class="section-view active">
                 
-                <div class="grid-2 mt-3">
-                    <div class="card"><div class="card-header"><span class="card-title"><i class="fa-solid fa-chart-column"></i> Volume Liberado (R$)</span></div><canvas id="chartOps"></canvas></div>
-                    <div class="card"><div class="card-header"><span class="card-title"><i class="fa-solid fa-chart-pie"></i> Pagos vs Em Atraso</span></div><canvas id="chartApprove"></canvas></div>
-                </div>
-            </div>
-
-            <!-- ================= 2. CLIENTES ================= -->
-            <div id="view-clientes" class="view">
-                
-                <!-- Formulário -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fa-solid fa-user-plus"></i> Novo Cliente (Supabase)</span>
-                        <button class="btn btn-primary" id="btn-salvar-cli" onclick="salvarCliente()"><i class="fa-solid fa-save"></i> Salvar Cliente</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center"><i class="ph ph-users text-blue-500 text-2xl"></i></div>
+                        <p class="text-sm text-gray-500 font-medium">Total Clientes</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">1.248</h3>
+                        <p class="text-xs text-green-500 mt-2 font-medium">+12% este mês</p>
                     </div>
-                    
-                    <div class="grid-4">
-                        <div class="form-group" style="grid-column: span 2;"><label>Nome Completo *</label><input type="text" id="cli-nome" placeholder="Nome do cliente"></div>
-                        <div class="form-group"><label>CPF *</label><input type="text" id="cli-cpf" placeholder="000.000.000-00"></div>
-                        <div class="form-group"><label>Data de Nascimento</label><input type="date" id="cli-nasc"></div>
-                        
-                        <div class="form-group"><label>Telefone / WhatsApp</label><input type="text" id="cli-tel"></div>
-                        <div class="form-group" style="grid-column: span 2;"><label>Endereço Completo</label><input type="text" id="cli-end"></div>
-                        <div class="form-group"><label>Score Interno</label><input type="number" id="cli-score" value="500"></div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-green-50 rounded-full flex items-center justify-center"><i class="ph ph-check-circle text-green-500 text-2xl"></i></div>
+                        <p class="text-sm text-gray-500 font-medium">Clientes Ativos</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">985</h3>
+                        <p class="text-xs text-gray-400 mt-2 font-medium">78.9% da base</p>
                     </div>
-                </div>
-
-                <!-- Tabela BD -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fa-solid fa-table"></i> Clientes Cadastrados (Real-Time BD)</span>
-                        <button class="btn btn-outline" onclick="carregarClientes()"><i class="fa-solid fa-rotate-right"></i> Atualizar Tabela</button>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-red-50 rounded-full flex items-center justify-center"><i class="ph ph-warning text-red-500 text-2xl"></i></div>
+                        <p class="text-sm text-gray-500 font-medium">Inadimplentes</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">63</h3>
+                        <p class="text-xs text-red-500 mt-2 font-medium">5.04% da base</p>
                     </div>
-                    <div class="table-container">
-                        <table id="tabela-clientes">
-                            <thead>
-                                <tr>
-                                    <th>Data Cadastro</th>
-                                    <th>Nome Completo</th>
-                                    <th>CPF</th>
-                                    <th>Telefone</th>
-                                    <th>Score</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-clientes">
-                                <!-- Preenchido pelo JS do Supabase -->
-                            </tbody>
-                        </table>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center"><i class="ph ph-money text-primary text-2xl"></i></div>
+                        <p class="text-sm text-gray-500 font-medium">Total Emprestado</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">R$ 2.4M</h3>
+                        <p class="text-xs text-gray-400 mt-2 font-medium">Acumulado anual</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center"><i class="ph ph-wallet text-purple-500 text-2xl"></i></div>
+                        <p class="text-sm text-gray-500 font-medium">Lucro Estimado</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">R$ 480k</h3>
+                        <p class="text-xs text-green-500 mt-2 font-medium">Projeção saudável</p>
                     </div>
                 </div>
-            </div>
 
-            <!-- ================= 3. AVALISTAS ================= -->
-            <div id="view-avalistas" class="view">
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fa-solid fa-handshake"></i> Cadastro de Avalista</span>
-                        <button class="btn btn-primary"><i class="fa-solid fa-save"></i> Salvar Avalista</button>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Operações x Faturamento Mensal</h3>
+                        <canvas id="chartOperacoes" height="100"></canvas>
                     </div>
-                    <div class="grid-4">
-                        <div class="form-group"><label>ID Cliente Vinculado</label><input type="text" placeholder="Buscar ID Cliente"></div>
-                        <div class="form-group" style="grid-column: span 2;"><label>Nome Completo do Avalista</label><input type="text"></div>
-                        <div class="form-group"><label>CPF</label><input type="text"></div>
-                        <div class="form-group"><label>Telefone</label><input type="text"></div>
-                        <div class="form-group" style="grid-column: span 2;"><label>Endereço Completo</label><input type="text"></div>
-                        <div class="form-group"><label>Renda Mensal (R$)</label><input type="number"></div>
-                        <div class="form-group"><label>Grau de Vínculo</label><input type="text" placeholder="Ex: Irmão, Amigo"></div>
-                        <div class="form-group"><label>Possui Restrição?</label><select><option>Não</option><option>Sim</option></select></div>
-                        <div class="form-group" style="grid-column: span 2;"><label>Observações</label><input type="text"></div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Inadimplência x Recebimento</h3>
+                        <canvas id="chartInadimplencia" height="100"></canvas>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- ================= 4. MICRO NEGÓCIO ================= -->
-            <div id="view-negocios" class="view">
-                <div class="card">
-                    <div class="card-header"><span class="card-title"><i class="fa-solid fa-store"></i> Detalhamento do Micro Negócio</span><button class="btn btn-primary">Salvar Negócio</button></div>
-                    <div class="grid-4">
-                        <div class="form-group" style="grid-column: span 2;"><label>Nome do Negócio</label><input type="text"></div>
-                        <div class="form-group"><label>Segmento</label><input type="text" placeholder="Ex: Vestuário"></div>
-                        <div class="form-group"><label>Tempo de Atividade</label><input type="text"></div>
-                        <div class="form-group"><label>Possui CNPJ?</label><select><option>Não</option><option>Sim</option></select></div>
-                        <div class="form-group" style="grid-column: span 2;"><label>Local de Funcionamento (Endereço)</label><input type="text"></div>
-                        <div class="form-group"><label>Ticket Médio (R$)</label><input type="number"></div>
+            <section id="clientes" class="section-view">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                    <div class="flex justify-between items-center mb-6 border-b pb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Novo Cliente</h3>
+                        <button class="bg-primary hover:bg-primaryHover text-white px-6 py-2 rounded-lg font-medium transition shadow-md shadow-primary/30" onclick="salvarCliente()">
+                            <i class="ph ph-floppy-disk mr-2"></i>Salvar Cadastro
+                        </button>
                     </div>
-                </div>
-            </div>
 
-            <!-- ================= 5. AVALIAÇÃO FINANCEIRA (Fluxo de Caixa) ================= -->
-            <div id="view-financeiro" class="view">
-                <div class="grid-2">
-                    <div class="card">
-                        <div class="card-header"><span class="card-title"><i class="fa-solid fa-cash-register"></i> Receitas & Despesas (Cálculo Automático)</span></div>
-                        
-                        <h4 class="text-primary mb-2">Receitas Mensais</h4>
-                        <div class="grid-2">
-                            <div class="form-group"><label>Faturamento Médio</label><input type="number" class="fin-calc" id="fin-fat" value="0"></div>
-                            <div class="form-group"><label>Outras Rendas</label><input type="number" class="fin-calc" id="fin-out-ren" value="0"></div>
+                    <form id="formCliente" class="space-y-8">
+                        <div>
+                            <h4 class="text-lg font-medium text-primary mb-4 flex items-center gap-2"><i class="ph ph-user"></i> Dados Pessoais</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="label-fintech">Nome Completo</label>
+                                    <input type="text" id="cliNome" class="input-fintech" placeholder="Ex: João da Silva">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">CPF</label>
+                                    <input type="text" id="cliCPF" class="input-fintech" placeholder="000.000.000-00">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">RG</label>
+                                    <input type="text" id="cliRG" class="input-fintech" placeholder="0000000">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Data de Nascimento</label>
+                                    <input type="date" id="cliDataNasc" class="input-fintech" onchange="calcularIdade()">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Idade (Automático)</label>
+                                    <input type="text" id="cliIdade" class="input-fintech bg-gray-50 text-gray-500" readonly>
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Estado Civil</label>
+                                    <select id="cliEstadoCivil" class="input-fintech">
+                                        <option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="label-fintech">WhatsApp</label>
+                                    <input type="text" id="cliWhats" class="input-fintech" placeholder="(00) 90000-0000">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">E-mail</label>
+                                    <input type="email" id="cliEmail" class="input-fintech" placeholder="joao@email.com">
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="section-divider"><span>Despesas</span></div>
-                        <div class="grid-2">
-                            <div class="form-group"><label>Custos Operacionais (Negócio)</label><input type="number" class="fin-calc" id="fin-op" value="0"></div>
-                            <div class="form-group"><label>Despesas Pessoais (Família)</label><input type="number" class="fin-calc" id="fin-pes" value="0"></div>
+                        <div>
+                            <h4 class="text-lg font-medium text-primary mb-4 flex items-center gap-2"><i class="ph ph-map-pin"></i> Endereço</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="label-fintech">CEP</label>
+                                    <input type="text" id="cliCEP" class="input-fintech" placeholder="00000-000">
+                                </div>
+                                <div class="xl:col-span-2">
+                                    <label class="label-fintech">Rua</label>
+                                    <input type="text" id="cliRua" class="input-fintech">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Número</label>
+                                    <input type="text" id="cliNum" class="input-fintech">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Bairro</label>
+                                    <input type="text" id="cliBairro" class="input-fintech">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Cidade</label>
+                                    <input type="text" id="cliCidade" class="input-fintech">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Estado</label>
+                                    <input type="text" id="cliEstado" class="input-fintech" placeholder="UF">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Tipo de Moradia</label>
+                                    <select id="cliMoradia" class="input-fintech">
+                                        <option>Própria</option><option>Alugada</option><option>Cedida</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
+
+                        <div>
+                            <h4 class="text-lg font-medium text-primary mb-4 flex items-center gap-2"><i class="ph ph-magnifying-glass"></i> Análise Interna</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="label-fintech">Score Interno</label>
+                                    <input type="number" id="cliScore" class="input-fintech" placeholder="0 a 1000">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Classificação de Risco</label>
+                                    <select id="cliRisco" class="input-fintech">
+                                        <option value="Baixo">Risco Baixo (Verde)</option>
+                                        <option value="Medio">Risco Médio (Amarelo)</option>
+                                        <option value="Alto">Risco Alto (Vermelho)</option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="label-fintech">Observações Internas</label>
+                                    <textarea id="cliObs" rows="3" class="input-fintech" placeholder="Anotações importantes sobre o cliente..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section id="operacoes" class="section-view">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                    <div class="flex justify-between items-center mb-6 border-b pb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Nova Operação de Crédito</h3>
+                        <button class="bg-primary hover:bg-primaryHover text-white px-6 py-2 rounded-lg font-medium transition shadow-md shadow-primary/30">
+                            <i class="ph ph-check-circle mr-2"></i>Aprovar Crédito
+                        </button>
                     </div>
 
-                    <div class="card" style="background: var(--sidebar-bg); color: #fff;">
-                        <div class="card-header" style="border-color: rgba(255,255,255,0.1)"><span class="card-title" style="color:#fff"><i class="fa-solid fa-chart-pie"></i> Resultado Real (Sobra de Caixa)</span></div>
-                        
-                        <div class="grid-2 mb-2">
-                            <div class="form-group"><label style="color:#9ca3af">Receita Total</label><input type="text" id="fc-rec" readonly style="background: rgba(255,255,255,0.05); color:#fff;"></div>
-                            <div class="form-group"><label style="color:#9ca3af">Despesa Total</label><input type="text" id="fc-desp-tot" readonly style="background: rgba(255,255,255,0.05); color:#ef4444; font-weight:bold;"></div>
-                        </div>
-
-                        <div class="form-group mb-2"><label style="color:#10b981; font-size:1rem;">Lucro Líquido Real</label><input type="text" id="fc-lucro" readonly style="background: #064e3b; color:#34d399; font-size: 1.5rem; font-weight:800; border:none;"></div>
-                        
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label style="color:#9ca3af">Margem Confiança (%)</label>
-                                <select id="fc-margem" onchange="calcFinanceiro()" style="background: #1f2937; color:#fff; border-color:#374151;">
-                                    <option value="0.30">30% (Conservador)</option>
-                                    <option value="0.40" selected>40% (Padrão)</option>
-                                    <option value="0.50">50% (Agressivo)</option>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="label-fintech">ID / Nome do Cliente</label>
+                                <select class="input-fintech">
+                                    <option>Selecione um cliente aprovado...</option>
+                                    <option>1042 - João da Silva</option>
                                 </select>
                             </div>
-                            <div class="form-group"><label style="color:#f59e0b">Capacidade Máx. Parcela</label><input type="text" id="fc-max-parc" readonly style="background: rgba(245, 158, 11, 0.1); color:#fcd34d; font-weight:bold;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= 6. OPERAÇÕES (Calculadora Price) ================= -->
-            <div id="view-operacoes" class="view">
-                <div class="card">
-                    <div class="card-header"><span class="card-title"><i class="fa-solid fa-file-contract"></i> Emissão de Contrato de Crédito</span></div>
-                    
-                    <div class="grid-4">
-                        <div class="form-group"><label>Valor Aprovado (R$)</label><input type="number" id="op-val" oninput="calcOp()" style="background: #f0fdf4; border-color: #86efac;"></div>
-                        <div class="form-group"><label>Taxa de Juros (% a.m)</label><input type="number" step="0.1" id="op-tax" oninput="calcOp()" value="3.5"></div>
-                        <div class="form-group"><label>Prazo (Meses)</label><input type="number" id="op-prz" oninput="calcOp()" value="12"></div>
-                        <div class="form-group"><label>Data 1º Vencimento</label><input type="date"></div>
-                        
-                        <div class="form-group"><label>Valor Parcela (Automático)</label><input type="text" id="op-parc-val" readonly style="color: var(--primary); font-weight: 800; font-size: 1.1rem;"></div>
-                        <div class="form-group"><label>Juros Total</label><input type="text" id="op-juros" readonly style="color: var(--danger);"></div>
-                        <div class="form-group"><label>Vlr Total Contrato</label><input type="text" id="op-total" readonly style="font-weight: bold;"></div>
-                        <div class="form-group"><label>Status</label><select><option>Em Análise</option><option>Aprovado</option></select></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= 7. PARCELAS ================= -->
-            <div id="view-parcelas" class="view">
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fa-solid fa-list-check"></i> Controle de Parcelas e Juros Automático</span>
-                        <button class="btn btn-outline" onclick="calcAtrasos()"><i class="fa-solid fa-rotate"></i> Recalcular Atrasos (Hoje)</button>
-                    </div>
-                    <div class="table-container">
-                        <table id="tbl-parcelas">
-                            <thead>
-                                <tr><th>OP</th><th>Parc</th><th>Vlr Orig.</th><th>Vencimento</th><th>Status</th><th>Dias Atraso</th><th>Multa+Juros</th><th>Vlr Atual</th><th>Ação</th></tr>
-                            </thead>
-                            <tbody>
-                                <!-- Injetado via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= 8. INADIMPLÊNCIA ================= -->
-            <div id="view-inadimplencia" class="view">
-                <div class="alert-box alert-danger">
-                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <div style="font-size: 1.1rem;">Painel de Cobrança</div>
-                        <div style="font-size: 0.85rem; font-weight: 400;">Atrasos críticos mapeados. Multa de 2% e Juros de Mora de 1% a.m pro-rata.</div>
-                    </div>
-                </div>
-                <div class="grid-4 mb-2">
-                    <div class="kpi-card" style="border-left-color: var(--danger)"><h4>Total Inadimplente</h4><div class="value red">R$ 14.530</div></div>
-                    <div class="kpi-card"><h4>Dias Médios Atraso</h4><div class="value">22 Dias</div></div>
-                    <div class="kpi-card"><h4>Recuperação Mês</h4><div class="value green">R$ 3.200</div></div>
-                </div>
-            </div>
-
-            <!-- ================= 9. RENOVAÇÃO ================= -->
-            <div id="view-renovacao" class="view">
-                <div class="card">
-                    <div class="card-header"><span class="card-title"><i class="fa-solid fa-rotate-right"></i> Motor de Renovação de Crédito</span></div>
-                    <div class="grid-2">
-                        <div>
-                            <div class="form-group"><label>Buscar ID Cliente</label><div class="flex gap-1"><input type="text" value="CLI-202511" style="flex:1"><button class="btn btn-outline">Analisar</button></div></div>
-                            <div class="mt-3 p-3" style="background: var(--bg); border-radius: 8px;">
-                                <p class="text-sm mb-2">Operações Quitadas: <strong>2</strong></p>
-                                <p class="text-sm mb-2">Score Comportamental: <strong class="text-success">920 / Excelência</strong></p>
-                                <p class="text-sm">Aumento Limite Sugerido: <strong class="text-primary">+ 35%</strong></p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="label-fintech">Valor Solicitado (R$)</label>
+                                    <input type="number" id="opValor" class="input-fintech" value="5000" onkeyup="calcularCredito()">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Taxa de Juros (% ao mês)</label>
+                                    <input type="number" id="opTaxa" class="input-fintech" value="3.5" step="0.1" onkeyup="calcularCredito()">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Prazo (Meses)</label>
+                                    <input type="number" id="opPrazo" class="input-fintech" value="12" onkeyup="calcularCredito()">
+                                </div>
+                                <div>
+                                    <label class="label-fintech">Dia de Vencimento</label>
+                                    <input type="number" class="input-fintech" value="10" min="1" max="31">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="label-fintech">Finalidade do Crédito</label>
+                                <select class="input-fintech">
+                                    <option>Capital de Giro</option><option>Compra de Equipamentos</option><option>Reforma do Negócio</option>
+                                </select>
                             </div>
                         </div>
-                        <div>
-                            <div class="form-group"><label>Crédito Atual Base (R$)</label><input type="number" value="3000" readonly></div>
-                            <div class="form-group"><label>Limite Pré-Aprovado (+35%)</label><input type="text" value="R$ 4.050,00" readonly style="color: var(--success); font-weight: bold;"></div>
-                            <button class="btn btn-primary mt-2"><i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Proposta</button>
+
+                        <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                            <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <i class="ph ph-calculator text-primary"></i> Simulação Automática
+                            </h4>
+                            
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                                    <span class="text-gray-500 font-medium">Valor Liberado</span>
+                                    <span class="text-xl font-bold text-gray-800" id="resValor">R$ 5.000,00</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                                    <span class="text-gray-500 font-medium">Juros Total Gerado</span>
+                                    <span class="text-lg font-bold text-orange-500" id="resJuros">R$ 2.100,00</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                                    <span class="text-gray-500 font-medium">Valor Total do Contrato</span>
+                                    <span class="text-lg font-bold text-gray-800" id="resTotal">R$ 7.100,00</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100 mt-4">
+                                    <span class="text-gray-600 font-bold">Valor da Parcela (Mensal)</span>
+                                    <span class="text-2xl font-black text-primary" id="resParcela">R$ 591,66</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- ================= 10. RELATÓRIOS ================= -->
-            <div id="view-relatorios" class="view">
-                <div class="grid-3">
-                    <div class="card" style="text-align: center;">
-                        <i class="fa-solid fa-users text-primary" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
-                        <h3>Carteira de Clientes</h3>
-                        <div class="flex gap-1 justify-center mt-2"><button class="btn btn-outline"><i class="fa-solid fa-file-pdf"></i> PDF</button><button class="btn btn-outline"><i class="fa-solid fa-file-excel text-success"></i> Excel</button></div>
-                    </div>
-                    <div class="card" style="text-align: center;">
-                        <i class="fa-solid fa-money-bill-transfer text-success" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
-                        <h3>Fluxo Financeiro</h3>
-                        <div class="flex gap-1 justify-center mt-2"><button class="btn btn-outline"><i class="fa-solid fa-file-pdf"></i> PDF</button><button class="btn btn-outline"><i class="fa-solid fa-file-excel text-success"></i> Excel</button></div>
-                    </div>
-                </div>
-            </div>
+            </section>
 
         </div>
-    </div>
+    </main>
 
-    <!-- ================= JAVASCRIPT ================= -->
     <script>
-        // 1. INICIALIZAÇÃO DO SUPABASE
-        const supabaseUrl = 'https://hrnekdzkdapqeaydzcpo.supabase.co';
-        const supabaseKey = 'sb_publishable_iqElQyZrTgJcrZaL8H4utQ_4Nb-_DQw';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        // -----------------------------------------------------
+        // 1. CONFIGURAÇÃO SUPABASE (Conforme fornecido)
+        // -----------------------------------------------------
+        const supaUrl = 'https://hrnekdzkdapqeaydzcpo.supabase.co';
+        const supaKey = 'sb_publishable_iqElQyZrTgJcrZaL8H4utQ_4Nb-_DQw'; // Ajuste caso falte o final da chave original
+        const supabase = supabase.createClient(supaUrl, supaKey);
 
-        // Verifica conexão (Ping)
-        async function testarConexao() {
-            try {
-                const { count, error } = await supabase.from('clientes').select('*', { count: 'exact', head: true });
-                
-                if (error) {
-                    console.error("Erro do Banco:", error.message);
-                    document.getElementById('db-status').innerText = "Erro Tabela (Execute o SQL)";
-                    document.getElementById('db-status').className = "text-danger";
-                    return;
-                }
+        // -----------------------------------------------------
+        // 2. LÓGICA DE NAVEGAÇÃO SPA (Single Page Application)
+        // -----------------------------------------------------
+        function showSection(sectionId) {
+            // Oculta todas as sections
+            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+            // Remove active do menu
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            
+            // Mostra a selecionada
+            document.getElementById(sectionId).classList.add('active');
+            event.currentTarget.classList.add('active');
 
-                document.getElementById('db-status').innerText = "Online";
-                document.getElementById('db-status').className = "text-success";
-                document.getElementById('dash-tot-cli').innerText = count || 0;
-                
-            } catch (err) {
-                console.error("Erro JS:", err);
-                document.getElementById('db-status').innerText = "Erro BD";
-                document.getElementById('db-status').className = "text-danger";
+            // Atualiza Título
+            const titles = {
+                'dashboard': 'Visão Geral',
+                'clientes': 'Gestão de Clientes',
+                'operacoes': 'Operações de Crédito'
+            };
+            document.getElementById('page-title').innerText = titles[sectionId] || 'CreditoMais';
+        }
+
+        // -----------------------------------------------------
+        // 3. CÁLCULOS AUTOMÁTICOS
+        // -----------------------------------------------------
+        
+        // Idade do Cliente
+        function calcularIdade() {
+            const dataNasc = document.getElementById('cliDataNasc').value;
+            if(!dataNasc) return;
+            const hoje = new Date();
+            const nasc = new Date(dataNasc);
+            let idade = hoje.getFullYear() - nasc.getFullYear();
+            const m = hoje.getMonth() - nasc.getMonth();
+            if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) {
+                idade--;
+            }
+            document.getElementById('cliIdade').value = idade + ' anos';
+        }
+
+        // Simulação de Operação (Juros Simples padrão de microcrédito)
+        function calcularCredito() {
+            const valor = parseFloat(document.getElementById('opValor').value) || 0;
+            const taxa = parseFloat(document.getElementById('opTaxa').value) || 0;
+            const prazo = parseInt(document.getElementById('opPrazo').value) || 0;
+
+            if(valor > 0 && prazo > 0) {
+                // Cálculo de Juros Simples: J = C * i * t
+                const jurosTotal = valor * (taxa / 100) * prazo;
+                const valorTotal = valor + jurosTotal;
+                const parcela = valorTotal / prazo;
+
+                const formataBRL = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                document.getElementById('resValor').innerText = formataBRL(valor);
+                document.getElementById('resJuros').innerText = formataBRL(jurosTotal);
+                document.getElementById('resTotal').innerText = formataBRL(valorTotal);
+                document.getElementById('resParcela').innerText = formataBRL(parcela);
             }
         }
-        testarConexao();
+        // Calcula na inicialização
+        calcularCredito();
 
-        // 2. NAVEGAÇÃO SPA
-        function nav(viewId) {
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.getElementById('view-' + viewId).classList.add('active');
-
-            const titles = { 'dashboard': 'Dashboard', 'clientes': 'Clientes', 'avalistas': 'Avalistas', 'negocios': 'Negócios', 'financeiro': 'Financeiro', 'operacoes': 'Operações', 'parcelas': 'Parcelas', 'inadimplencia': 'Inadimplência', 'renovacao': 'Renovação', 'relatorios': 'Relatórios' };
-            document.getElementById('header-title').innerText = titles[viewId];
-
-            if(viewId === 'dashboard' && !window.chartsRendered) initCharts();
-            if(viewId === 'clientes') carregarClientes(); 
-            if(viewId === 'parcelas') calcAtrasos(); 
-        }
-
-        // 3. SALVAR CLIENTE
+        // -----------------------------------------------------
+        // 4. FUNÇÃO DE SALVAR NO SUPABASE (Exemplo Clientes)
+        // -----------------------------------------------------
         async function salvarCliente() {
-            const btn = document.getElementById('btn-salvar-cli');
-            const nome = document.getElementById('cli-nome').value;
-            const cpf = document.getElementById('cli-cpf').value;
-            const nasc = document.getElementById('cli-nasc').value;
-            const tel = document.getElementById('cli-tel').value;
-            const end = document.getElementById('cli-end').value;
-            const score = document.getElementById('cli-score').value || 0;
+            const nome = document.getElementById('cliNome').value;
+            const cpf = document.getElementById('cliCPF').value;
+            
+            if(!nome || !cpf) {
+                alert('Nome e CPF são obrigatórios.');
+                return;
+            }
 
-            if (!nome || !cpf) return alert("Nome e CPF são obrigatórios!");
-
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando no BD...';
-            btn.disabled = true;
-
+            // Exemplo de Inserção no Supabase (Requer tabela 'clientes' criada no banco)
+            /*
             const { data, error } = await supabase
                 .from('clientes')
-                .insert([{ nome_completo: nome, cpf: cpf, data_nascimento: nasc || null, telefone: tel, rua: end, score_interno: parseInt(score) }]);
-
-            btn.innerHTML = '<i class="fa-solid fa-save"></i> Salvar Cliente';
-            btn.disabled = false;
-
+                .insert([{ nome_completo: nome, cpf: cpf, status: 'Ativo' }]);
+            
             if (error) {
-                alert("Erro ao salvar: Verifique se a tabela foi criada no Supabase.\n" + error.message);
+                console.error(error);
+                alert('Erro ao salvar no banco!');
             } else {
-                alert("Cliente registrado com sucesso!");['cli-nome', 'cli-cpf', 'cli-nasc', 'cli-tel', 'cli-end'].forEach(id => document.getElementById(id).value = '');
-                carregarClientes();
-                testarConexao();    
+                alert('Cliente salvo com sucesso no Supabase!');
+                document.getElementById('formCliente').reset();
             }
+            */
+           alert('Demonstração: Lógica de envio para Supabase acionada. (Descomente o código para integração real)');
         }
 
-        // 4. LER CLIENTES
-        async function carregarClientes() {
-            const tbody = document.getElementById('tbody-clientes');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center"><i class="fa-solid fa-spinner fa-spin"></i> Buscando no banco de dados...</td></tr>';
-
-            const { data, error } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }).limit(20);
-
-            if (error) return tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Erro: ${error.message}</td></tr>`;
-            
-            tbody.innerHTML = '';
-            if (data.length === 0) return tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Nenhum cliente cadastrado ainda.</td></tr>';
-
-            data.forEach(cliente => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${new Date(cliente.created_at).toLocaleDateString('pt-BR')}</td>
-                    <td class="font-bold">${cliente.nome_completo}</td>
-                    <td>${cliente.cpf}</td>
-                    <td>${cliente.telefone || '-'}</td>
-                    <td><span class="badge ${cliente.score_interno > 600 ? 'badge-green' : 'badge-yellow'}">${cliente.score_interno}</span></td>
-                    <td><button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger)" onclick="deletarCliente('${cliente.id}')"><i class="fa-solid fa-trash"></i></button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // 4.1 DELETAR CLIENTE
-        async function deletarCliente(id) {
-            if(confirm("Deseja apagar este cliente do Banco de Dados?")) {
-                const { error } = await supabase.from('clientes').delete().eq('id', id);
-                if(error) alert("Erro ao deletar: " + error.message);
-                else { carregarClientes(); testarConexao(); }
-            }
-        }
-
-        // 5. CÁLCULO FINANCEIRO
-        const formataBRL = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-        function calcFinanceiro() {
-            const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
-            const rec = getV('fin-fat') + getV('fin-out-ren');
-            const totalDesp = getV('fin-op') + getV('fin-pes');
-            const lucro = rec - totalDesp;
-            const margem = parseFloat(document.getElementById('fc-margem').value);
-            const capacidade = lucro > 0 ? (lucro * margem) : 0;
-
-            document.getElementById('fc-rec').value = formataBRL(rec);
-            document.getElementById('fc-desp-tot').value = formataBRL(totalDesp);
-            document.getElementById('fc-lucro').value = formataBRL(lucro);
-            document.getElementById('fc-max-parc').value = formataBRL(capacidade);
-        }
-        document.querySelectorAll('.fin-calc').forEach(el => el.addEventListener('input', calcFinanceiro));
-
-        // 6. CÁLCULO PRICE (OPERAÇÃO)
-        function calcOp() {
-            const val = parseFloat(document.getElementById('op-val').value) || 0;
-            const prz = parseInt(document.getElementById('op-prz').value) || 0;
-            const tax = (parseFloat(document.getElementById('op-tax').value) || 0) / 100;
-            
-            if (val > 0 && prz > 0 && tax > 0) {
-                const pmt = val * (tax * Math.pow((1 + tax), prz)) / (Math.pow((1 + tax), prz) - 1);
-                const total = pmt * prz;
-                document.getElementById('op-parc-val').value = formataBRL(pmt);
-                document.getElementById('op-total').value = formataBRL(total);
-                document.getElementById('op-juros').value = formataBRL(total - val);
-            } else {
-                document.getElementById('op-parc-val').value = "R$ 0,00";
-            }
-        }
-        
-        // 7. CÁLCULO DE ATRASOS (MOCK TABELA PARCELAS)
-        function calcAtrasos() {
-            const tbody = document.querySelector('#tbl-parcelas tbody');
-            tbody.innerHTML = '';
-            const HOJE = new Date(); // Data real de hoje
-
-            const parcelasMock =[
-                { op: 'OP-1001', num: '1/5', vlr: 450, venc: new Date(HOJE.getFullYear(), HOJE.getMonth()-1, HOJE.getDate()).toISOString().split('T')[0], status: 'Pago' },
-                { op: 'OP-1001', num: '2/5', vlr: 450, venc: new Date(HOJE.getFullYear(), HOJE.getMonth(), HOJE.getDate()-10).toISOString().split('T')[0], status: 'Pendente' }, // Vencido há 10 dias
-                { op: 'OP-1001', num: '3/5', vlr: 450, venc: new Date(HOJE.getFullYear(), HOJE.getMonth()+1, HOJE.getDate()).toISOString().split('T')[0], status: 'Pendente' }
-            ];
-
-            parcelasMock.forEach(p => {
-                const dtVenc = new Date(p.venc + 'T00:00:00');
-                let diasAtraso = 0;
-                let multaJuros = 0;
-                let vlrAtual = p.vlr;
-
-                if (p.status === 'Pendente' && dtVenc < HOJE) {
-                    const diffTime = Math.abs(HOJE - dtVenc);
-                    diasAtraso = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    const multa = p.vlr * 0.02; // Multa Fixa 2%
-                    const jurosPorDia = (p.vlr * 0.01) / 30; // Juros 1% a.m pro rata
-                    multaJuros = multa + (jurosPorDia * diasAtraso);
-                    vlrAtual = p.vlr + multaJuros;
-                }
-
-                let badge = p.status === 'Pago' ? 'badge-green' : (diasAtraso > 0 ? 'badge-red' : 'badge-yellow');
-                let txtSt = diasAtraso > 0 && p.status !== 'Pago' ? 'Atrasado' : (p.status==='Pendente'?'A Vencer':p.status);
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="font-bold">${p.op}</td><td>${p.num}</td><td>${formataBRL(p.vlr)}</td>
-                    <td>${dtVenc.toLocaleDateString('pt-BR')}</td><td><span class="badge ${badge}">${txtSt}</span></td>
-                    <td class="${diasAtraso>0?'text-danger font-bold':''}">${diasAtraso > 0 ? diasAtraso+' d' : '-'}</td>
-                    <td class="${multaJuros>0?'text-danger':''}">${multaJuros > 0 ? formataBRL(multaJuros) : '-'}</td>
-                    <td class="font-bold text-primary">${formataBRL(vlrAtual)}</td>
-                    <td>${p.status !== 'Pago' ? `<button class="btn btn-success" style="padding:0.3rem 0.6rem; font-size:0.8rem">Baixar</button>` : `-`}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // 8. GRÁFICOS (CHART.JS CORRIGIDO)
-        function initCharts() {
-            window.chartsRendered = true;
-            Chart.defaults.font.family = 'Inter';
-            
-            new Chart(document.getElementById('chartOps'), {
+        // -----------------------------------------------------
+        // 5. INICIALIZAÇÃO DE GRÁFICOS (Chart.js)
+        // -----------------------------------------------------
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gráfico 1
+            const ctx1 = document.getElementById('chartOperacoes').getContext('2d');
+            new Chart(ctx1, {
                 type: 'bar',
-                data: { 
-                    labels:['Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'], 
-                    datasets:[{ label: 'Liberado (R$)', data:[120000, 150000, 135000, 180000, 160000, 210000], backgroundColor: '#FF6B00', borderRadius: 4 }] 
-                }
-            });
-            
-            new Chart(document.getElementById('chartApprove'), {
-                type: 'doughnut',
-                data: { 
-                    labels:['Pagos no Prazo', 'Em Atraso'], 
-                    datasets: [{ data:[85, 15], backgroundColor:['#10b981', '#ef4444'], borderWidth: 0 }] 
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Faturamento (R$)',
+                        data: [120000, 190000, 150000, 220000, 180000, 250000],
+                        backgroundColor: '#FF6B00',
+                        borderRadius: 6
+                    }]
                 },
-                options: { cutout: '75%' }
+                options: { responsive: true, plugins: { legend: { display: false } } }
             });
-        }
-        
-        window.onload = () => { initCharts(); calcOp(); };
+
+            // Gráfico 2
+            const ctx2 = document.getElementById('chartInadimplencia').getContext('2d');
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Inadimplência (%)',
+                        data: [4.2, 4.5, 3.8, 5.1, 4.8, 5.0],
+                        borderColor: '#EF4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        });
     </script>
 </body>
 </html>
