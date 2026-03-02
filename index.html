@@ -178,7 +178,7 @@
     .overlay-bg { display: none; position: fixed; inset: 0; background: rgba(28,25,23,.5); backdrop-filter: blur(2px); z-index: 90; transition: opacity .3s; }
     .overlay-bg.open { display: block; }
     
-    /* ESTILOS PARA VISUALIZAÇÃO DE CLIENTES (Novo) */
+    /* ESTILOS PARA VISUALIZAÇÃO DE CLIENTES */
     .detail-item { padding: 10px 0; border-bottom: 1px solid var(--border-light); }
     .detail-label { font-size: 11px; text-transform: uppercase; color: var(--text-light); font-weight: 600; margin-bottom: 4px; }
     .detail-value { font-size: 14px; font-weight: 500; color: var(--text); }
@@ -341,7 +341,6 @@
             <div class="search-bar">
               <input type="text" id="searchOperacoes" placeholder="Buscar contrato, nome ou CPF..." oninput="loadOperacoes()" style="flex:2; min-width: 220px;" />
               <input type="date" id="filterOpDate" onchange="loadOperacoes()" title="Data de Contratação" />
-              
               <select id="filterStatusOp" onchange="loadOperacoes()">
                 <option value="">Todos os status</option>
                 <option value="em_analise">Em Análise</option><option value="aprovada">Aprovada</option><option value="liberada">Liberada</option>
@@ -420,10 +419,19 @@
 
 <div class="modal-overlay" id="modalViewCliente">
   <div class="modal">
-    <div class="modal-header"><h3 id="viewNome">Detalhes do Cliente</h3><button class="modal-close" onclick="closeModal('modalViewCliente')">&times;</button></div>
+    <div class="modal-header">
+       <h3 id="viewNome">Detalhes do Cliente</h3>
+       <button class="modal-close" onclick="closeModal('modalViewCliente')">&times;</button>
+    </div>
     <div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;" id="viewClienteBody">
        </div>
-    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modalViewCliente')">Fechar</button></div>
+    <div class="modal-footer">
+       <button class="btn btn-outline" onclick="closeModal('modalViewCliente')">Fechar</button>
+       <button class="btn btn-primary" id="btnViewPrint" onclick="">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          Gerar PDF / Imprimir
+       </button>
+    </div>
   </div>
 </div>
 
@@ -468,7 +476,7 @@
     <div class="modal-body">
       <input type="hidden" id="avalistaId" />
       <div class="form-grid">
-        <div class="form-group"><label>Foto</label><input type="file" id="aFoto" accept="image/*" /><input type="hidden" id="aFotoUrl" /></div>
+        <div class="form-group"><label>Foto de Perfil</label><input type="file" id="aFoto" accept="image/*" /><input type="hidden" id="aFotoUrl" /></div>
         <div class="form-group"><label>Cliente</label><select id="aCliente"></select></div>
         <div class="form-group"><label>Nome</label><input type="text" id="aNome" /></div>
         <div class="form-group"><label>CPF</label><input type="text" id="aCpf" maxlength="14" oninput="maskCPF(this)" /></div>
@@ -643,8 +651,9 @@
     </div>
     <div class="modal-body">
       <input type="hidden" id="cobClienteId" />
-      <input type="hidden" id="cobTelefone" /> <div style="display:flex; gap:24px; flex-wrap:wrap;">
-        
+      <input type="hidden" id="cobTelefone" />
+      
+      <div style="display:flex; gap:24px; flex-wrap:wrap;">
         <div style="flex:1; min-width:280px;">
           <h4 style="margin-bottom:12px; font-size:14px; color:var(--primary);">Novo Contato</h4>
           <div class="form-grid">
@@ -666,13 +675,11 @@
             </button>
           </div>
         </div>
-
         <div style="flex:1; min-width:280px; border-left:1px solid var(--border); padding-left:24px;">
           <h4 style="margin-bottom:12px; font-size:14px; color:var(--text-secondary);">Histórico de Ações</h4>
           <div id="listHistorico" style="max-height:300px; overflow-y:auto; padding-right:10px;">
-             </div>
+          </div>
         </div>
-
       </div>
     </div>
     <div class="modal-footer">
@@ -913,6 +920,7 @@
         <td><strong>${c.nome}</strong></td><td>${c.cpf}</td><td>${c.celular || '-'}</td><td>${c.cidade || '-'}/${c.uf || '-'}</td><td>${statusBadge(c.status)}</td>
         <td><div class="btn-group">
           <button class="btn btn-info btn-sm" onclick="viewCliente('${c.id}')">Ver Detalhes</button>
+          <button class="btn btn-outline btn-sm" onclick="printCliente('${c.id}')">Imprimir</button>
           <button class="btn btn-outline btn-sm" onclick="editCliente('${c.id}')">Editar</button>
           <button class="btn btn-danger btn-sm" onclick="deleteCliente('${c.id}')">Excluir</button>
         </div></td>
@@ -943,7 +951,54 @@
         <div style="grid-column: 1 / -1; display:flex; gap:10px;">${docsHtml}</div>
      `;
      document.getElementById('viewClienteBody').innerHTML = html;
+     
+     // Associa a função de impressão ao novo botão na modal Ver Detalhes
+     document.getElementById('btnViewPrint').setAttribute('onclick', "printCliente('" + id + "')");
+     
      openModal('modalViewCliente');
+  }
+
+  async function printCliente(id) {
+    const { data: c } = await sb.from('clientes').select('*').eq('id', id).single();
+    if (!c) { showToast('Cliente não encontrado para impressão', 'error'); return; }
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Ficha do Cliente - ${c.nome}</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; padding: 40px; color: #1c1917; line-height: 1.6; }
+            h1 { border-bottom: 2px solid #ea580c; color: #ea580c; padding-bottom: 10px; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th { text-align: left; padding: 12px; background: #faf7f5; border-bottom: 1px solid #e7e5e4; width: 30%; }
+            td { padding: 12px; border-bottom: 1px solid #e7e5e4; }
+            .doc-img { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 10px; border: 1px solid #ccc; display: block; }
+          </style>
+        </head>
+        <body>
+          <h1>Ficha de Cadastro: ${c.nome}</h1>
+          <table>
+            <tr><th>CPF</th><td>${c.cpf}</td></tr>
+            <tr><th>RG</th><td>${c.rg || '-'}</td></tr>
+            <tr><th>Data Nasc.</th><td>${fmtDate(c.data_nascimento)}</td></tr>
+            <tr><th>Estado Civil</th><td>${c.estado_civil || '-'}</td></tr>
+            <tr><th>Escolaridade</th><td>${c.escolaridade || '-'}</td></tr>
+            <tr><th>Telefone</th><td>${c.telefone || '-'}</td></tr>
+            <tr><th>Celular</th><td>${c.celular || '-'}</td></tr>
+            <tr><th>E-mail</th><td>${c.email || '-'}</td></tr>
+            <tr><th>Endereço Completo</th><td>${c.endereco || '-'}, ${c.numero || '-'} ${c.complemento ? ' - ' + c.complemento : ''}<br>${c.bairro || '-'} - ${c.cidade || '-'}/${c.uf || '-'} (CEP: ${c.cep || '-'})</td></tr>
+            <tr><th>Renda Mensal</th><td>${fmt(c.renda_mensal)}</td></tr>
+            <tr><th>Despesa Mensal</th><td>${fmt(c.despesa_mensal)}</td></tr>
+            <tr><th>Observações</th><td>${c.observacoes || '-'}</td></tr>
+          </table>
+          ${c.doc_frente ? `<h3>Documento (Frente)</h3><img src="${c.doc_frente}" class="doc-img"/>` : ''}
+          ${c.doc_verso ? `<h3>Documento (Verso)</h3><img src="${c.doc_verso}" class="doc-img"/>` : ''}
+          <script>setTimeout(() => { window.print(); window.close(); }, 1500);<\/script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   }
 
   function openClienteModal(c) {
