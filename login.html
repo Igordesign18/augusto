@@ -24,12 +24,12 @@
       min-height: 100vh; 
       -webkit-font-smoothing: antialiased; 
     }
-    .login-container { width: 100%; max-width: 400px; padding: 20px; }
+    .login-container { width: 100%; max-width: 420px; padding: 20px; }
     .login-card { 
       background: var(--surface); 
-      border-radius: 20px; 
-      padding: 40px; 
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08); 
+      border-radius: 24px; 
+      padding: 40px 30px; 
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08); 
       text-align: center; 
       position: relative; 
       overflow: hidden; 
@@ -42,24 +42,31 @@
       background: linear-gradient(90deg, var(--primary), #fbbf24); 
     }
     
-    /* ===== LOGO ATUALIZADA ===== */
+    /* ===== LOGO AUMENTADA E COM EFEITOS ===== */
     .logo { 
-      height: 110px; /* Aumentado para deixar bem visível */
-      margin: 0 auto 24px; 
+      height: 160px; /* Muito maior e em destaque */
+      width: 100%;
+      margin: 0 auto 20px; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
-      background: transparent; /* Sem fundo para encaixar a sua logo limpa */
+      background: transparent; 
     }
     .logo img { 
       max-width: 100%; 
       max-height: 100%; 
       object-fit: contain; 
+      filter: drop-shadow(0 10px 15px rgba(234, 88, 12, 0.15)); /* Sombra suave que dá profundidade */
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    /* =========================== */
+    .logo img:hover {
+      transform: scale(1.03); /* Efeito de leve zoom ao passar o rato */
+    }
+    /* ======================================== */
 
-    h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
     p.subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; }
+    
     .form-group { text-align: left; margin-bottom: 20px; }
     .form-group label { 
       display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); 
@@ -72,7 +79,7 @@
     }
     .form-group input { 
       width: 100%; padding: 14px 14px 14px 44px; border: 1.5px solid var(--border); 
-      border-radius: 10px; font-size: 14px; font-family: inherit; color: var(--text); 
+      border-radius: 12px; font-size: 14px; font-family: inherit; color: var(--text); 
       background: var(--bg); transition: var(--transition); 
     }
     .form-group input:focus { 
@@ -80,14 +87,17 @@
       box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.1); 
     }
     .form-group input:focus + svg { color: var(--primary); }
+    
     .btn-submit { 
-      width: 100%; padding: 14px; border: none; border-radius: 10px; 
+      width: 100%; padding: 15px; border: none; border-radius: 12px; 
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); 
       color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; 
-      transition: var(--transition); box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3); 
+      transition: var(--transition); box-shadow: 0 6px 16px rgba(234, 88, 12, 0.25); 
       display: flex; align-items: center; justify-content: center; gap: 8px; 
+      margin-top: 10px;
     }
-    .btn-submit:hover { box-shadow: 0 6px 16px rgba(234, 88, 12, 0.4); transform: translateY(-1px); }
+    .btn-submit:hover { box-shadow: 0 8px 20px rgba(234, 88, 12, 0.35); transform: translateY(-2px); }
+    .btn-submit:active { transform: translateY(1px); }
     .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
     
     .toast-container { position: fixed; top: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; }
@@ -108,23 +118,25 @@
 
 <div class="login-container">
   <div class="login-card">
+    
     <div class="logo">
       <img src="https://i.ibb.co/FLgdNwfr/image-2.png" alt="MicroCred Logo" />
     </div>
+
     <h1>Bem-vindo</h1>
-    <p class="subtitle">Acesso ao sistema MicroCred</p>
+    <p class="subtitle">Acesse o sistema MicroCred</p>
 
     <form id="loginForm" onsubmit="handleLogin(event)">
       <div class="form-group">
-        <label for="username">Utilizador</label>
+        <label for="username">Usuário</label>
         <div class="input-wrapper">
-          <input type="text" id="username" placeholder="Insira o seu utilizador" required />
+          <input type="text" id="username" placeholder="Insira o seu usuário" required />
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="password">Palavra-passe</label>
+        <label for="password">Senha</label>
         <div class="input-wrapper">
           <input type="password" id="password" placeholder="••••••••" required />
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -156,19 +168,19 @@
 
     // LOGIN MANUAL (As credenciais que pediu)
     if (user === 'Creditomais.sf' && pass === 'Benjamim@26') {
-      showToast('Acesso autorizado! A redirecionar...', 'success');
+      showToast('Acesso autorizado! Redirecionando...', 'success');
       
       // Guarda a sessão de forma local no navegador
       sessionStorage.setItem('microcred_auth', 'true');
       
       document.getElementById('btnSubmit').disabled = true;
-      document.getElementById('btnText').textContent = 'A entrar...';
+      document.getElementById('btnText').textContent = 'Entrando...';
 
       setTimeout(() => {
         window.location.href = 'index.html'; 
       }, 1000);
     } else {
-      showToast('Utilizador ou palavra-passe incorretos!', 'error');
+      showToast('Usuário ou senha incorretos!', 'error');
     }
   }
 
