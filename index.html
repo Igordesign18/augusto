@@ -385,7 +385,13 @@
         <div class="card">
           <div class="card-header">
             <h3>Controle de Inadimplência</h3>
-            <button class="btn btn-primary" onclick="checkInadimplencia()">Atualizar Status</button>
+            <div style="display: flex; gap: 10px;">
+               <button class="btn btn-outline" onclick="printInadimplenciaGeral()">
+                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                 Gerar PDF Geral
+               </button>
+               <button class="btn btn-primary" onclick="checkInadimplencia()">Atualizar Status</button>
+            </div>
           </div>
           <div class="card-body no-padding">
             <div class="table-wrap">
@@ -474,7 +480,7 @@
     <div class="modal-body">
       <input type="hidden" id="avalistaId" />
       <div class="form-grid">
-        <div class="form-group"><label>Foto de Perfil</label><input type="file" id="aFoto" accept="image/*" /><input type="hidden" id="aFotoUrl" /></div>
+        <div class="form-group"><label>Foto de Perfil (Opcional)</label><input type="file" id="aFoto" accept="image/*" /><input type="hidden" id="aFotoUrl" /></div>
         <div class="form-group"><label>Cliente</label><select id="aCliente"></select></div>
         <div class="form-group"><label>Nome</label><input type="text" id="aNome" /></div>
         <div class="form-group"><label>CPF</label><input type="text" id="aCpf" maxlength="14" oninput="maskCPF(this)" /></div>
@@ -1231,9 +1237,9 @@
     if (dias < 0) { meses--; const ultimoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 0); dias += ultimoMes.getDate(); }
     if (meses < 0) { anos--; meses += 12; }
     const partes = [];
-    if (anos > 0) push(`${anos} ano${anos > 1 ? 's' : ''}`);
-    if (meses > 0) push(`${meses} mês${meses > 1 ? 'es' : ''}`);
-    if (dias > 0) push(`${dias} dia${dias > 1 ? 's' : ''}`);
+    if (anos > 0) partes.push(`${anos} ano${anos > 1 ? 's' : ''}`);
+    if (meses > 0) partes.push(`${meses} mês${meses > 1 ? 'es' : ''}`);
+    if (dias > 0) partes.push(`${dias} dia${dias > 1 ? 's' : ''}`);
     calcOutput.value = partes.length > 0 ? partes.join(', ') : 'Menos de 1 dia';
   }
 
@@ -1680,7 +1686,7 @@
   }
 
   // =============================================
-  // INADIMPLENCIA E COBRANCA + PDF NOVO
+  // INADIMPLENCIA E COBRANCA + PDF GERAL
   // =============================================
   let inadCacheAgrupado = {};
 
@@ -1735,7 +1741,6 @@
                 <div class="btn-group">
                    <button class="btn btn-outline btn-sm" onclick="toggleDetInad('${cid}')">Ver Parcelas</button>
                    <button class="btn btn-primary btn-sm" onclick="openCobrancaCliente('${cid}')">Cobrar / WhatsApp</button>
-                   <button class="btn btn-info btn-sm" onclick="printInadimplencia('${cid}')">Gerar PDF</button>
                 </div>
              </td>
           </tr>
@@ -1774,48 +1779,25 @@
     loadInadimplencia();
   }
 
-  // NOVO: Gerar PDF de Inadimplência
-  function printInadimplencia(cid) {
-    const g = inadCacheAgrupado[cid];
-    if (!g) { showToast('Dados não encontrados', 'error'); return; }
+  // NOVO: Gerar PDF GERAL de Inadimplência
+  function printInadimplenciaGeral() {
+    if (Object.keys(inadCacheAgrupado).length === 0) {
+      showToast('Nenhum registro de inadimplência para imprimir.', 'info');
+      return;
+    }
 
-    const c = g.cliente;
-    const itens = g.itens;
-    const total = g.total;
+    let htmlContent = '';
+    let totalGeral = 0;
 
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Relatório de Inadimplência - ${c.nome}</title>
-          <style>
-            body { font-family: 'Inter', sans-serif; padding: 40px; color: #1c1917; line-height: 1.6; }
-            .header { border-bottom: 2px solid #dc2626; padding-bottom: 10px; margin-bottom: 20px; }
-            .header h1 { color: #dc2626; margin: 0; }
-            .info-section { margin-bottom: 30px; background: #faf7f5; padding: 15px; border-radius: 8px; border: 1px solid #e7e5e4; }
-            .info-section h3 { margin-top: 0; margin-bottom: 10px; color: #ea580c; border-bottom: 1px solid #e7e5e4; padding-bottom: 5px; }
-            .info-section p { margin: 4px 0; font-size: 14px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th { text-align: left; padding: 12px; background: #fee2e2; border-bottom: 2px solid #dc2626; color: #991b1b; }
-            td { padding: 12px; border-bottom: 1px solid #e7e5e4; font-size: 14px; }
-            .total { font-size: 18px; font-weight: bold; text-align: right; margin-top: 20px; color: #dc2626; padding-top: 15px; border-top: 2px solid #dc2626; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Relatório de Inadimplência</h1>
-            <p><strong>Emissão:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
-          </div>
-          
-          <div class="info-section">
-            <h3>Dados do Cliente</h3>
-            <p><strong>Nome Completo:</strong> ${c.nome}</p>
-            <p><strong>CPF:</strong> ${c.cpf}</p>
-            <p><strong>Telefone/Celular:</strong> ${c.celular || c.telefone || '-'}</p>
-            <p><strong>Endereço:</strong> ${c.endereco || '-'}, ${c.numero || '-'} - ${c.cidade || '-'}/${c.uf || '-'}</p>
-          </div>
+    for (let cid in inadCacheAgrupado) {
+      const g = inadCacheAgrupado[cid];
+      totalGeral += g.total;
+      const c = g.cliente;
 
-          <h3>Detalhes das Parcelas em Atraso</h3>
+      htmlContent += `
+        <div class="client-section">
+          <h3>${c.nome} (CPF: ${c.cpf})</h3>
+          <p><strong>Telefone:</strong> ${c.celular || c.telefone || '-'}</p>
           <table>
             <thead>
               <tr>
@@ -1827,7 +1809,7 @@
               </tr>
             </thead>
             <tbody>
-              ${itens.map(i => `
+              ${g.itens.map(i => `
                 <tr>
                   <td>${i.operacao?.numero_contrato || '-'}</td>
                   <td>Nº ${i.parcela?.numero_parcela || '-'}</td>
@@ -1838,13 +1820,44 @@
               `).join('')}
             </tbody>
           </table>
+          <p class="client-total">Total do Cliente: ${fmt(g.total)}</p>
+        </div>
+      `;
+    }
 
-          <div class="total">
-            Total Geral Devido: ${fmt(total)}
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Relatório Geral de Inadimplência</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; padding: 40px; color: #1c1917; line-height: 1.6; }
+            .header { border-bottom: 2px solid #dc2626; padding-bottom: 10px; margin-bottom: 30px; }
+            .header h1 { color: #dc2626; margin: 0; }
+            .client-section { margin-bottom: 30px; page-break-inside: avoid; background: #faf7f5; padding: 15px; border-radius: 8px; border: 1px solid #e7e5e4; }
+            .client-section h3 { margin-top: 0; margin-bottom: 10px; color: #ea580c; border-bottom: 1px solid #e7e5e4; padding-bottom: 5px; font-size: 16px; }
+            .client-section p { margin: 4px 0; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 10px; background: #fff; }
+            th { text-align: left; padding: 8px; background: #fee2e2; border-bottom: 2px solid #dc2626; color: #991b1b; font-size: 12px; }
+            td { padding: 8px; border-bottom: 1px solid #e7e5e4; font-size: 13px; }
+            .client-total { font-weight: bold; text-align: right; color: #dc2626; margin-top: 10px; font-size: 15px; }
+            .grand-total { font-size: 20px; font-weight: bold; text-align: right; margin-top: 30px; color: #991b1b; padding-top: 15px; border-top: 3px solid #dc2626; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>MicroCred - Relatório Geral de Inadimplência</h1>
+            <p><strong>Data de Emissão:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
+          </div>
+          
+          ${htmlContent}
+
+          <div class="grand-total">
+            TOTAL GERAL EM ATRASO NA CARTEIRA: ${fmt(totalGeral)}
           </div>
 
           <div style="margin-top: 50px; text-align: center; color: #a8a29e; font-size: 12px;">
-            Documento gerado pelo sistema MicroCred.
+            Documento gerado confidencialmente pelo sistema MicroCred.
           </div>
 
           <script>
