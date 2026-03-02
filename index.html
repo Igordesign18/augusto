@@ -37,7 +37,6 @@
     ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
 
-    /* SIDEBAR */
     .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: linear-gradient(180deg, #1c1917 0%, #292524 100%); color: #fff; display: flex; flex-direction: column; z-index: 100; transition: transform .35s cubic-bezier(.4,0,.2,1); overflow: hidden; }
     .sidebar::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at top left, rgba(234,88,12,.12) 0%, transparent 60%); pointer-events: none; }
     .sidebar-header { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 14px; position: relative; }
@@ -53,7 +52,6 @@
     .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: .8; }
     .nav-item.active svg { opacity: 1; }
 
-    /* MAIN */
     .main { margin-left: var(--sidebar-width); min-height: 100vh; }
     .topbar { height: var(--header-height); background: rgba(255,255,255,.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 50; }
     .topbar-left { display: flex; align-items: center; gap: 14px; }
@@ -71,7 +69,6 @@
     .page-section.active { display: block; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* STATS & CARDS */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
     .stat-card { background: var(--surface); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; overflow: hidden; transition: var(--transition); }
     .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
@@ -90,7 +87,6 @@
     .card-body { padding: 22px; }
     .card-body.no-padding { padding: 0; }
 
-    /* TABLES */
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     thead { background: #fafaf9; }
@@ -100,7 +96,6 @@
     tbody tr:hover { background: #fef3c7; }
     .empty-state { text-align: center; padding: 40px 20px !important; color: var(--text-light); }
 
-    /* FORM */
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
     .form-group { display: flex; flex-direction: column; gap: 5px; }
     .form-group.full { grid-column: 1 / -1; }
@@ -111,7 +106,6 @@
     .form-group input::placeholder { color: var(--text-light); }
     .form-group textarea { resize: vertical; min-height: 80px; }
 
-    /* BUTTONS */
     .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: var(--transition); white-space: nowrap; position: relative; overflow: hidden; }
     .btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: var(--transition); }
     .btn:hover::after { background: rgba(255,255,255,.1); }
@@ -126,7 +120,6 @@
     .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* BADGES */
     .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; letter-spacing: .2px; }
     .badge-success { background: var(--success-bg); color: #166534; }
     .badge-danger { background: var(--danger-bg); color: #991b1b; }
@@ -134,7 +127,6 @@
     .badge-info { background: var(--info-bg); color: #075985; }
     .badge-neutral { background: #f5f5f4; color: #57534e; }
 
-    /* MODAL */
     .modal-overlay { position: fixed; inset: 0; background: rgba(28,25,23,.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: none; align-items: flex-start; justify-content: center; z-index: 200; padding: 40px 16px; overflow-y: auto; }
     .modal-overlay.open { display: flex; }
     .modal { background: var(--surface); border-radius: calc(var(--radius) * 1.5); width: 100%; max-width: 720px; box-shadow: var(--shadow-lg); animation: modalIn .3s cubic-bezier(.4,0,.2,1); }
@@ -146,14 +138,12 @@
     .modal-body { padding: 24px; }
     .modal-footer { padding: 18px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: #fafaf9; border-radius: 0 0 calc(var(--radius) * 1.5) calc(var(--radius) * 1.5); }
 
-    /* TABS & SEARCH */
     .search-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
     .search-bar input, .search-bar select { flex: 1; min-width: 180px; padding: 9px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; transition: var(--transition); background: var(--surface); }
     .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
     .tab { padding: 12px 22px; font-size: 13px; font-weight: 600; color: var(--text-light); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: var(--transition); background: none; border-top: 0; border-left: 0; border-right: 0; font-family: inherit; }
     .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-    /* TOAST */
     .toast-container { position: fixed; top: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; }
     .toast { padding: 14px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: #fff; box-shadow: var(--shadow-lg); animation: toastIn .3s ease, toastOut .3s ease 3s forwards; max-width: 340px; }
     .toast.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
@@ -161,7 +151,6 @@
     @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } }
     @keyframes toastOut { to { opacity: 0; transform: translateX(30px); } }
 
-    /* RESPONSIVE */
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); width: 280px; }
       .sidebar.open { transform: translateX(0); }
@@ -176,7 +165,6 @@
     .overlay-bg { display: none; position: fixed; inset: 0; background: rgba(28,25,23,.5); backdrop-filter: blur(2px); z-index: 90; transition: opacity .3s; }
     .overlay-bg.open { display: block; }
     
-    /* ESTILOS PARA VISUALIZAÇÃO DE CLIENTES */
     .detail-item { padding: 10px 0; border-bottom: 1px solid var(--border-light); }
     .detail-label { font-size: 11px; text-transform: uppercase; color: var(--text-light); font-weight: 600; margin-bottom: 4px; }
     .detail-value { font-size: 14px; font-weight: 500; color: var(--text); }
@@ -409,7 +397,7 @@
 
       <div class="page-section" id="page-relatorios">
         <div class="tabs"><button class="tab active" onclick="switchReportTab(this,'repResumo')">Resumo Geral</button><button class="tab" onclick="switchReportTab(this,'repCarteira')">Carteira</button><button class="tab" onclick="switchReportTab(this,'repExportar')">Exportar Dados</button></div>
-        <div id="repResumo"><div class="stats-grid" id="reportStats"></div><div class="card"><div class="card-header"><h3>Operações por Status</h3></div><div class="card-body" id="reportChart"></div></div></div>
+        <div id="repResumo"><div class="stats-grid" id="reportStats"></div><div class="card"><div class="card-header"><h3>Operações por Status (Simples)</h3></div><div class="card-body" id="reportChart"></div></div></div>
         <div id="repCarteira" style="display:none;"><div class="card"><div class="card-header"><h3>Carteira Ativa</h3></div><div class="card-body no-padding"><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Contrato</th><th>Valor Original</th><th>Parcelas Pagas</th><th>Saldo Restante</th><th>Status</th></tr></thead><tbody id="tblCarteira"></tbody></table></div></div></div></div>
         <div id="repExportar" style="display:none;"><div class="card"><div class="card-body"><h3 style="margin-bottom:8px;font-size:16px;">Exportar Dados</h3><p style="color:var(--text-light);margin-bottom:24px;font-size:13px;">Exporte os dados do sistema em formato CSV para análise externa.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;max-width:480px;"><button class="btn btn-outline" onclick="exportCSV('clientes')">Clientes (CSV)</button><button class="btn btn-outline" onclick="exportCSV('operacoes')">Operações (CSV)</button><button class="btn btn-outline" onclick="exportCSV('parcelas')">Parcelas (CSV)</button><button class="btn btn-outline" onclick="exportCSV('inadimplencia')">Inadimplência (CSV)</button></div></div></div></div>
       </div>
@@ -476,7 +464,7 @@
     <div class="modal-body">
       <input type="hidden" id="avalistaId" />
       <div class="form-grid">
-        <div class="form-group"><label>Foto de Perfil</label><input type="file" id="aFoto" accept="image/*" /><input type="hidden" id="aFotoUrl" /></div>
+        <div class="form-group"><label>Foto de Perfil (Opcional)</label><input type="file" id="aFoto" accept="image/*" /><input type="hidden" id="aFotoUrl" /></div>
         <div class="form-group"><label>Cliente</label><select id="aCliente"></select></div>
         <div class="form-group"><label>Nome</label><input type="text" id="aNome" /></div>
         <div class="form-group"><label>CPF</label><input type="text" id="aCpf" maxlength="14" oninput="maskCPF(this)" /></div>
@@ -691,7 +679,7 @@
 
 <script>
   // =============================================
-  // SUPABASE CLIENT & AUTH
+  // SUPABASE CLIENT & STATE
   // =============================================
   const SUPABASE_URL = 'https://hrnekdzkdapqeaydzcpo.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_iqElQyZrTgJcrZaL8H4utQ_4Nb-_DQw';
@@ -707,25 +695,21 @@
     }
     sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // VERIFICA O LOGIN
-    const { data: { session } } = await sb.auth.getSession();
-    
-    if (!session) {
-      // Se não tem sessão, expulsa para a tela de login
+    // VERIFICA O LOGIN MANUAL
+    if (sessionStorage.getItem('microcred_auth') !== 'true') {
       window.location.href = 'login.html'; 
       return;
     }
 
-    // Se passou, exibe o e-mail da pessoa logada lá no topo
     const emailDisplay = document.getElementById('userEmailDisplay');
-    if (emailDisplay) emailDisplay.textContent = session.user.email;
+    if (emailDisplay) emailDisplay.textContent = 'Creditomais.sf';
 
     navigate('dashboard');
   }
 
-  // NOVA FUNÇÃO: Fazer Logout
-  async function logout() {
-    await sb.auth.signOut();
+  // FUNÇÃO: Fazer Logout
+  function logout() {
+    sessionStorage.removeItem('microcred_auth');
     window.location.href = 'login.html';
   }
 
@@ -972,7 +956,6 @@
      `;
      document.getElementById('viewClienteBody').innerHTML = html;
      
-     // Associa a função de impressão ao novo botão na modal Ver Detalhes
      document.getElementById('btnViewPrint').setAttribute('onclick', "printCliente('" + id + "')");
      
      openModal('modalViewCliente');
