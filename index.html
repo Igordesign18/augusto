@@ -37,6 +37,7 @@
     ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
 
+    /* SIDEBAR */
     .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: linear-gradient(180deg, #1c1917 0%, #292524 100%); color: #fff; display: flex; flex-direction: column; z-index: 100; transition: transform .35s cubic-bezier(.4,0,.2,1); overflow: hidden; }
     .sidebar::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at top left, rgba(234,88,12,.12) 0%, transparent 60%); pointer-events: none; }
     .sidebar-header { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 14px; position: relative; }
@@ -52,6 +53,7 @@
     .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: .8; }
     .nav-item.active svg { opacity: 1; }
 
+    /* MAIN */
     .main { margin-left: var(--sidebar-width); min-height: 100vh; }
     .topbar { height: var(--header-height); background: rgba(255,255,255,.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 50; }
     .topbar-left { display: flex; align-items: center; gap: 14px; }
@@ -69,6 +71,7 @@
     .page-section.active { display: block; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* STATS & CARDS */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
     .stat-card { background: var(--surface); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; overflow: hidden; transition: var(--transition); }
     .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
@@ -87,6 +90,7 @@
     .card-body { padding: 22px; }
     .card-body.no-padding { padding: 0; }
 
+    /* TABLES */
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     thead { background: #fafaf9; }
@@ -96,6 +100,7 @@
     tbody tr:hover { background: #fef3c7; }
     .empty-state { text-align: center; padding: 40px 20px !important; color: var(--text-light); }
 
+    /* FORM */
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
     .form-group { display: flex; flex-direction: column; gap: 5px; }
     .form-group.full { grid-column: 1 / -1; }
@@ -106,6 +111,7 @@
     .form-group input::placeholder { color: var(--text-light); }
     .form-group textarea { resize: vertical; min-height: 80px; }
 
+    /* BUTTONS */
     .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: var(--transition); white-space: nowrap; position: relative; overflow: hidden; }
     .btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: var(--transition); }
     .btn:hover::after { background: rgba(255,255,255,.1); }
@@ -120,6 +126,7 @@
     .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+    /* BADGES */
     .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; letter-spacing: .2px; }
     .badge-success { background: var(--success-bg); color: #166534; }
     .badge-danger { background: var(--danger-bg); color: #991b1b; }
@@ -127,6 +134,7 @@
     .badge-info { background: var(--info-bg); color: #075985; }
     .badge-neutral { background: #f5f5f4; color: #57534e; }
 
+    /* MODAL */
     .modal-overlay { position: fixed; inset: 0; background: rgba(28,25,23,.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: none; align-items: flex-start; justify-content: center; z-index: 200; padding: 40px 16px; overflow-y: auto; }
     .modal-overlay.open { display: flex; }
     .modal { background: var(--surface); border-radius: calc(var(--radius) * 1.5); width: 100%; max-width: 720px; box-shadow: var(--shadow-lg); animation: modalIn .3s cubic-bezier(.4,0,.2,1); }
@@ -138,12 +146,14 @@
     .modal-body { padding: 24px; }
     .modal-footer { padding: 18px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: #fafaf9; border-radius: 0 0 calc(var(--radius) * 1.5) calc(var(--radius) * 1.5); }
 
+    /* TABS & SEARCH */
     .search-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
     .search-bar input, .search-bar select { flex: 1; min-width: 180px; padding: 9px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; transition: var(--transition); background: var(--surface); }
     .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
     .tab { padding: 12px 22px; font-size: 13px; font-weight: 600; color: var(--text-light); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: var(--transition); background: none; border-top: 0; border-left: 0; border-right: 0; font-family: inherit; }
     .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
+    /* TOAST */
     .toast-container { position: fixed; top: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; }
     .toast { padding: 14px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: #fff; box-shadow: var(--shadow-lg); animation: toastIn .3s ease, toastOut .3s ease 3s forwards; max-width: 340px; }
     .toast.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
@@ -464,7 +474,7 @@
     <div class="modal-body">
       <input type="hidden" id="avalistaId" />
       <div class="form-grid">
-        <div class="form-group"><label>Foto de Perfil (Opcional)</label><input type="file" id="aFoto" accept="image/*" /><input type="hidden" id="aFotoUrl" /></div>
+        <div class="form-group"><label>Foto de Perfil</label><input type="file" id="aFoto" accept="image/*" /><input type="hidden" id="aFotoUrl" /></div>
         <div class="form-group"><label>Cliente</label><select id="aCliente"></select></div>
         <div class="form-group"><label>Nome</label><input type="text" id="aNome" /></div>
         <div class="form-group"><label>CPF</label><input type="text" id="aCpf" maxlength="14" oninput="maskCPF(this)" /></div>
@@ -1221,9 +1231,9 @@
     if (dias < 0) { meses--; const ultimoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 0); dias += ultimoMes.getDate(); }
     if (meses < 0) { anos--; meses += 12; }
     const partes = [];
-    if (anos > 0) partes.push(`${anos} ano${anos > 1 ? 's' : ''}`);
-    if (meses > 0) partes.push(`${meses} mês${meses > 1 ? 'es' : ''}`);
-    if (dias > 0) partes.push(`${dias} dia${dias > 1 ? 's' : ''}`);
+    if (anos > 0) push(`${anos} ano${anos > 1 ? 's' : ''}`);
+    if (meses > 0) push(`${meses} mês${meses > 1 ? 'es' : ''}`);
+    if (dias > 0) push(`${dias} dia${dias > 1 ? 's' : ''}`);
     calcOutput.value = partes.length > 0 ? partes.join(', ') : 'Menos de 1 dia';
   }
 
@@ -1670,7 +1680,7 @@
   }
 
   // =============================================
-  // INADIMPLENCIA E COBRANCA
+  // INADIMPLENCIA E COBRANCA + PDF NOVO
   // =============================================
   let inadCacheAgrupado = {};
 
@@ -1725,6 +1735,7 @@
                 <div class="btn-group">
                    <button class="btn btn-outline btn-sm" onclick="toggleDetInad('${cid}')">Ver Parcelas</button>
                    <button class="btn btn-primary btn-sm" onclick="openCobrancaCliente('${cid}')">Cobrar / WhatsApp</button>
+                   <button class="btn btn-info btn-sm" onclick="printInadimplencia('${cid}')">Gerar PDF</button>
                 </div>
              </td>
           </tr>
@@ -1761,6 +1772,88 @@
     if (!confirm('Marcar como resolvido?')) return;
     await sb.from('inadimplencia').update({ status: 'resolvido' }).eq('id', id);
     loadInadimplencia();
+  }
+
+  // NOVO: Gerar PDF de Inadimplência
+  function printInadimplencia(cid) {
+    const g = inadCacheAgrupado[cid];
+    if (!g) { showToast('Dados não encontrados', 'error'); return; }
+
+    const c = g.cliente;
+    const itens = g.itens;
+    const total = g.total;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Relatório de Inadimplência - ${c.nome}</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; padding: 40px; color: #1c1917; line-height: 1.6; }
+            .header { border-bottom: 2px solid #dc2626; padding-bottom: 10px; margin-bottom: 20px; }
+            .header h1 { color: #dc2626; margin: 0; }
+            .info-section { margin-bottom: 30px; background: #faf7f5; padding: 15px; border-radius: 8px; border: 1px solid #e7e5e4; }
+            .info-section h3 { margin-top: 0; margin-bottom: 10px; color: #ea580c; border-bottom: 1px solid #e7e5e4; padding-bottom: 5px; }
+            .info-section p { margin: 4px 0; font-size: 14px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { text-align: left; padding: 12px; background: #fee2e2; border-bottom: 2px solid #dc2626; color: #991b1b; }
+            td { padding: 12px; border-bottom: 1px solid #e7e5e4; font-size: 14px; }
+            .total { font-size: 18px; font-weight: bold; text-align: right; margin-top: 20px; color: #dc2626; padding-top: 15px; border-top: 2px solid #dc2626; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Relatório de Inadimplência</h1>
+            <p><strong>Emissão:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
+          </div>
+          
+          <div class="info-section">
+            <h3>Dados do Cliente</h3>
+            <p><strong>Nome Completo:</strong> ${c.nome}</p>
+            <p><strong>CPF:</strong> ${c.cpf}</p>
+            <p><strong>Telefone/Celular:</strong> ${c.celular || c.telefone || '-'}</p>
+            <p><strong>Endereço:</strong> ${c.endereco || '-'}, ${c.numero || '-'} - ${c.cidade || '-'}/${c.uf || '-'}</p>
+          </div>
+
+          <h3>Detalhes das Parcelas em Atraso</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Contrato</th>
+                <th>Parcela</th>
+                <th>Vencimento</th>
+                <th>Dias Atraso</th>
+                <th>Valor Atualizado</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itens.map(i => `
+                <tr>
+                  <td>${i.operacao?.numero_contrato || '-'}</td>
+                  <td>Nº ${i.parcela?.numero_parcela || '-'}</td>
+                  <td>${fmtDate(i.parcela?.data_vencimento)}</td>
+                  <td>${i.dias_atraso} dias</td>
+                  <td style="font-weight: bold;">${fmt(i.valor_total_devido)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="total">
+            Total Geral Devido: ${fmt(total)}
+          </div>
+
+          <div style="margin-top: 50px; text-align: center; color: #a8a29e; font-size: 12px;">
+            Documento gerado pelo sistema MicroCred.
+          </div>
+
+          <script>
+            setTimeout(() => { window.print(); window.close(); }, 1000);
+          <\/script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   }
 
   async function openCobrancaCliente(cid) {
