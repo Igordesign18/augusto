@@ -65,8 +65,7 @@
     .conn-badge { font-size: 11px; font-weight: 600; color: var(--success); background: var(--success-bg); padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 5px; }
     .conn-badge::before { content: ''; width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
-    .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 2px 8px rgba(234,88,12,.3); }
-
+    
     .content { padding: 28px; max-width: 1400px; }
     .page-section { display: none; animation: fadeUp .35s ease; }
     .page-section.active { display: block; }
@@ -173,7 +172,6 @@
       .search-bar input { min-width: 0; }
       .modal { margin: 16px; max-width: calc(100% - 32px); }
       th, td { padding: 10px 12px; font-size: 12px; }
-      .conn-badge { display: none; }
     }
     .overlay-bg { display: none; position: fixed; inset: 0; background: rgba(28,25,23,.5); backdrop-filter: blur(2px); z-index: 90; transition: opacity .3s; }
     .overlay-bg.open { display: block; }
@@ -223,6 +221,8 @@
       </div>
       <div class="topbar-right">
         <div class="conn-badge" id="connStatus">Online</div>
+        <span id="userEmailDisplay" style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-left: 10px;"></span>
+        <button class="btn btn-outline btn-sm" onclick="logout()" style="margin-left: 10px; border-color: var(--danger); color: var(--danger);">Sair</button>
       </div>
     </header>
 
@@ -409,7 +409,7 @@
 
       <div class="page-section" id="page-relatorios">
         <div class="tabs"><button class="tab active" onclick="switchReportTab(this,'repResumo')">Resumo Geral</button><button class="tab" onclick="switchReportTab(this,'repCarteira')">Carteira</button><button class="tab" onclick="switchReportTab(this,'repExportar')">Exportar Dados</button></div>
-        <div id="repResumo"><div class="stats-grid" id="reportStats"></div><div class="card"><div class="card-header"><h3>Operações por Status (Simples)</h3></div><div class="card-body" id="reportChart"></div></div></div>
+        <div id="repResumo"><div class="stats-grid" id="reportStats"></div><div class="card"><div class="card-header"><h3>Operações por Status</h3></div><div class="card-body" id="reportChart"></div></div></div>
         <div id="repCarteira" style="display:none;"><div class="card"><div class="card-header"><h3>Carteira Ativa</h3></div><div class="card-body no-padding"><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Contrato</th><th>Valor Original</th><th>Parcelas Pagas</th><th>Saldo Restante</th><th>Status</th></tr></thead><tbody id="tblCarteira"></tbody></table></div></div></div></div>
         <div id="repExportar" style="display:none;"><div class="card"><div class="card-body"><h3 style="margin-bottom:8px;font-size:16px;">Exportar Dados</h3><p style="color:var(--text-light);margin-bottom:24px;font-size:13px;">Exporte os dados do sistema em formato CSV para análise externa.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;max-width:480px;"><button class="btn btn-outline" onclick="exportCSV('clientes')">Clientes (CSV)</button><button class="btn btn-outline" onclick="exportCSV('operacoes')">Operações (CSV)</button><button class="btn btn-outline" onclick="exportCSV('parcelas')">Parcelas (CSV)</button><button class="btn btn-outline" onclick="exportCSV('inadimplencia')">Inadimplência (CSV)</button></div></div></div></div>
       </div>
@@ -691,7 +691,7 @@
 
 <script>
   // =============================================
-  // SUPABASE CLIENT & STATE
+  // SUPABASE CLIENT & AUTH
   // =============================================
   const SUPABASE_URL = 'https://hrnekdzkdapqeaydzcpo.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_iqElQyZrTgJcrZaL8H4utQ_4Nb-_DQw';
@@ -700,13 +700,33 @@
   let chartStatusInstance = null;
   let chartFinInstance = null;
 
-  function initApp() {
+  async function initApp() {
     if (!SUPABASE_URL || SUPABASE_URL === 'SUA_URL_AQUI') {
-      document.getElementById('appShell').innerHTML = '<div style="max-width:480px;margin:80px auto;text-align:center;padding:20px;"><h2>Credenciais nao configuradas</h2></div>';
+      document.getElementById('appShell').innerHTML = '<div style="max-width:480px;margin:80px auto;text-align:center;padding:20px;"><h2>Credenciais não configuradas</h2></div>';
       return;
     }
     sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // VERIFICA O LOGIN
+    const { data: { session } } = await sb.auth.getSession();
+    
+    if (!session) {
+      // Se não tem sessão, expulsa para a tela de login
+      window.location.href = 'login.html'; 
+      return;
+    }
+
+    // Se passou, exibe o e-mail da pessoa logada lá no topo
+    const emailDisplay = document.getElementById('userEmailDisplay');
+    if (emailDisplay) emailDisplay.textContent = session.user.email;
+
     navigate('dashboard');
+  }
+
+  // NOVA FUNÇÃO: Fazer Logout
+  async function logout() {
+    await sb.auth.signOut();
+    window.location.href = 'login.html';
   }
 
   // =============================================
