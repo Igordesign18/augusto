@@ -42,9 +42,9 @@
       background: linear-gradient(90deg, var(--primary), #fbbf24); 
     }
     
-    /* ===== LOGO AUMENTADA E COM EFEITOS ===== */
+    /* ===== LOGO GRANDE E ESTÁTICA ===== */
     .logo { 
-      height: 160px; /* Muito maior e em destaque */
+      height: 160px; /* Mantém grande e em destaque */
       width: 100%;
       margin: 0 auto 20px; 
       display: flex; 
@@ -56,11 +56,7 @@
       max-width: 100%; 
       max-height: 100%; 
       object-fit: contain; 
-      filter: drop-shadow(0 10px 15px rgba(234, 88, 12, 0.15)); /* Sombra suave que dá profundidade */
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .logo img:hover {
-      transform: scale(1.03); /* Efeito de leve zoom ao passar o rato */
+      /* Efeitos removidos conforme solicitado */
     }
     /* ======================================== */
 
@@ -124,19 +120,19 @@
     </div>
 
     <h1>Bem-vindo</h1>
-    <p class="subtitle">Acesse o sistema MicroCred</p>
+    <p class="subtitle">Aceda ao sistema MicroCred</p>
 
     <form id="loginForm" onsubmit="handleLogin(event)">
       <div class="form-group">
-        <label for="username">Usuário</label>
+        <label for="username">Utilizador</label>
         <div class="input-wrapper">
-          <input type="text" id="username" placeholder="Insira o seu usuário" required />
+          <input type="text" id="username" placeholder="Insira o seu utilizador" required />
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="password">Senha</label>
+        <label for="password">Palavra-passe</label>
         <div class="input-wrapper">
           <input type="password" id="password" placeholder="••••••••" required />
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -166,21 +162,21 @@
     const user = document.getElementById('username').value.trim();
     const pass = document.getElementById('password').value.trim();
 
-    // LOGIN MANUAL (As credenciais que pediu)
+    // LOGIN MANUAL
     if (user === 'Creditomais.sf' && pass === 'Benjamim@26') {
-      showToast('Acesso autorizado! Redirecionando...', 'success');
+      showToast('Acesso autorizado! A redirecionar...', 'success');
       
       // Guarda a sessão de forma local no navegador
       sessionStorage.setItem('microcred_auth', 'true');
       
       document.getElementById('btnSubmit').disabled = true;
-      document.getElementById('btnText').textContent = 'Entrando...';
+      document.getElementById('btnText').textContent = 'A entrar...';
 
       setTimeout(() => {
         window.location.href = 'index.html'; 
       }, 1000);
     } else {
-      showToast('Usuário ou senha incorretos!', 'error');
+      showToast('Utilizador ou palavra-passe incorretos!', 'error');
     }
   }
 
