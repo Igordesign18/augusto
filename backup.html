@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MicroCred - Gerador de Backup</title>
+  <title>MicroCred - Gerador de Backup Mestre</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -24,69 +24,49 @@
       padding: 40px;
       border-radius: 16px;
       text-align: center;
-      max-width: 400px;
+      max-width: 450px;
       width: 100%;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
       border-top: 4px solid #ea580c;
     }
-    h1 {
-      margin-top: 0;
-      color: #ea580c;
-      font-size: 24px;
-    }
-    p {
-      color: #a8a29e;
-      font-size: 14px;
-      line-height: 1.5;
-      margin-bottom: 30px;
-    }
+    h1 { margin-top: 0; color: #ea580c; font-size: 24px; }
+    p { color: #a8a29e; font-size: 14px; line-height: 1.5; margin-bottom: 30px; }
     .btn {
       background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.3s;
+      color: white; border: none; padding: 14px 24px; font-size: 16px;
+      font-weight: bold; border-radius: 8px; cursor: pointer;
+      width: 100%; transition: all 0.3s;
     }
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(234, 88, 12, 0.4);
-    }
-    .btn:disabled {
-      background: #57534e;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    #status {
-      margin-top: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #16a34a;
-      min-height: 20px;
-    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(234, 88, 12, 0.4); }
+    .btn:disabled { background: #57534e; cursor: not-allowed; transform: none; box-shadow: none; }
+    #status { margin-top: 20px; font-size: 13px; font-weight: 600; color: #16a34a; min-height: 20px; }
+    .warning { background: rgba(220, 38, 38, 0.2); border: 1px solid #dc2626; padding: 10px; border-radius: 8px; font-size: 12px; color: #fca5a5; margin-bottom: 20px; text-align: left;}
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h1>Backup do Sistema</h1>
-    <p>Clique no botão abaixo para descarregar uma cópia completa de todos os dados do Supabase (Clientes, Operações, Parcelas, etc.) em formato JSON.</p>
+    <h1>Backup Mestre do Sistema</h1>
+    <div class="warning">
+      <strong>⚠️ AVISO DE SEGURANÇA:</strong><br>
+      Este ficheiro contém a chave mestra do banco de dados. Guarde-o apenas no seu computador. Nunca o envie para a hospedagem online!
+    </div>
+    <p>Clique no botão abaixo para extrair absolutamente todos os dados do sistema em formato JSON.</p>
     
-    <button class="btn" id="btnBackup" onclick="gerarBackup()">Gerar Backup Completo</button>
+    <button class="btn" id="btnBackup" onclick="gerarBackup()">Baixar Backup Completo</button>
     
-    <div id="status"></div>
+    <div id="status">Pronto para iniciar.</div>
   </div>
 
   <script>
-    // Conexão com o seu Supabase
+    // URL do Supabase
     const SUPABASE_URL = 'https://hrnekdzkdapqeaydzcpo.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_iqElQyZrTgJcrZaL8H4utQ_4Nb-_DQw';
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // A SUA CHAVE "SERVICE_ROLE" (SECRET)
+    const SUPABASE_SERVICE_KEY = 'sb_secret_ljJeA9nqMyyyBszOCuhToQ_B4TIF9-H';
+    
+    // Conecta usando a chave mestra que ignora bloqueios de segurança (RLS)
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     // Lista de todas as tabelas do seu sistema
     const tabelas = [
@@ -108,17 +88,61 @@
       const status = document.getElementById('status');
       
       btn.disabled = true;
-      btn.textContent = 'A gerar backup... Aguarde.';
+      btn.textContent = 'A extrair dados... Aguarde.';
       status.style.color = '#fbbf24';
-      status.textContent = 'A iniciar a recolha de dados...';
+      status.textContent = 'A iniciar ligação segura...';
 
       let backupData = {
-        data_geracao: new Date().toISOString(),
+        data_backup: new Date().toLocaleString('pt-BR'),
         tabelas: {}
       };
 
       try {
         for (let tabela of tabelas) {
-          status.textContent = `A ler tabela: ${tabela}...`;
+          status.textContent = `A extrair tabela: ${tabela}...`;
           
-          // O limite padrão
+          const { data, error } = await sb.from(tabela).select('*');
+          
+          if (error) {
+            console.error(`Erro na tabela ${tabela}:`, error);
+            backupData.tabelas[tabela] = { erro: error.message };
+          } else {
+            backupData.tabelas[tabela] = data;
+          }
+        }
+
+        status.textContent = 'A compilar o ficheiro JSON...';
+
+        // Converte os dados para texto JSON formatado
+        const jsonString = JSON.stringify(backupData, null, 2);
+        
+        // Cria o ficheiro para download
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        // Nome do arquivo com data e hora exatas
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        a.download = `MicroCred_Backup_${timestamp}.json`;
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        status.style.color = '#16a34a';
+        status.textContent = 'Download do Backup concluído com sucesso!';
+      } catch (err) {
+        console.error('Erro fatal:', err);
+        status.style.color = '#dc2626';
+        status.textContent = 'Falha crítica: ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Gerar Novo Backup';
+      }
+    }
+  </script>
+
+</body>
+</html>
