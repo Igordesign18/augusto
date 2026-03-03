@@ -2,44 +2,42 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>MicroCred - Backup à Prova de Falhas (Sem Bloqueios)</title>
+  <title>MicroCred - Backup do Sistema</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body { font-family: 'Inter', sans-serif; background: #1c1917; color: #fff; padding: 40px; margin: 0; }
     .container { max-width: 800px; margin: 0 auto; background: #292524; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-top: 4px solid #ea580c; }
     h1 { margin-top: 0; color: #ea580c; }
-    .btn { background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); color: white; border: none; padding: 14px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-bottom: 20px; }
-    .btn:disabled { background: #57534e; cursor: not-allowed; }
+    .btn { background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); color: white; border: none; padding: 14px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-bottom: 20px; transition: all 0.3s; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(234, 88, 12, 0.4); }
+    .btn:disabled { background: #57534e; cursor: not-allowed; transform: none; box-shadow: none; }
     
     /* Terminal de Log */
-    .terminal { background: #000; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px; height: 250px; overflow-y: auto; margin-bottom: 20px; line-height: 1.5; }
+    .terminal { background: #000; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px; height: 250px; overflow-y: auto; margin-bottom: 20px; line-height: 1.5; border: 1px solid #444; }
     
     /* Área de Fallback (Cópia Manual) */
     #fallbackArea { display: none; }
     textarea { width: 100%; height: 200px; background: #1c1917; color: #a8a29e; border: 1px solid #444; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; resize: vertical; margin-bottom: 10px; }
     .btn-copy { background: #16a34a; margin-bottom: 0; }
-    .warning { background: rgba(220, 38, 38, 0.2); border: 1px solid #dc2626; padding: 10px; border-radius: 8px; font-size: 12px; color: #fca5a5; margin-bottom: 20px; text-align: left;}
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>Gerador de Backup Mestre (Acesso Direto)</h1>
-    <div class="warning">
-      <strong>⚠️ USO LOCAL APENAS:</strong><br>
-      Este ficheiro ignora as travas do Supabase fazendo conexão direta. Guarde-o seguro no seu computador.
-    </div>
+    <h1>Gerador de Backup (Chave Pública)</h1>
+    <p style="color:#a8a29e;">A extrair dados de forma segura utilizando a chave pública do sistema.</p>
     
     <button class="btn" id="btnBackup" onclick="gerarBackup()">1. Iniciar Extração de Dados</button>
     
     <div class="terminal" id="logTerminal">
-      <span style="color: #a8a29e;">> Sistema pronto. Nenhuma restrição detetada. Aguardando...</span><br>
+      <span style="color: #a8a29e;">> Sistema pronto. Aguardando comando...</span><br>
     </div>
 
     <div id="fallbackArea">
       <h3 style="color:#fbbf24; margin-bottom:10px;">Download concluído ou bloqueado?</h3>
-      <p style="color:#a8a29e; font-size:13px; margin-top:0;">Se o ficheiro não baixou sozinho, copie o código abaixo e guarde num ficheiro .json.</p>
+      <p style="color:#a8a29e; font-size:13px; margin-top:0;">Se o ficheiro não descarregou sozinho, copie o código abaixo e guarde num ficheiro .json.</p>
       <textarea id="txtBackup" readonly></textarea>
       <button class="btn btn-copy" onclick="copiarTexto()">2. Copiar Código de Backup</button>
     </div>
@@ -49,8 +47,10 @@
     // 1. O URL base do seu projeto
     const SUPABASE_URL = 'https://hrnekdzkdapqeaydzcpo.supabase.co';
     
-    // 2. COLOQUE A SUA CHAVE AQUI
-    const SUPABASE_SERVICE_KEY = 'sb_secret_ljJeA9nqMyyyBszOCuhToQ_B4TIF9-H';
+    // 2. A SUA CHAVE PÚBLICA (ANON KEY)
+    const SUPABASE_ANON_KEY = 'sb_publishable_iqElQyZrTgJcrZaL8H4utQ_4Nb-_DQw';
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const tabelas = [
       'usuarios_clientes', 'clientes', 'avalistas', 'micro_negocios',
@@ -70,7 +70,7 @@
       document.getElementById('fallbackArea').style.display = 'none';
       
       btn.disabled = true;
-      logMsg('A iniciar conexão direta à API Rest (Bypassing Supabase JS Client)...', '#fbbf24');
+      logMsg('A iniciar conexão com a chave pública...', '#fbbf24');
 
       let backupData = {
         data_backup: new Date().toLocaleString('pt-BR'),
@@ -81,37 +81,26 @@
 
       try {
         for (let tabela of tabelas) {
-          logMsg(`A solicitar dados da tabela [${tabela}]...`, '#60a5fa');
+          logMsg(`A ler a tabela [${tabela}]...`, '#60a5fa');
           
-          // CONEXÃO DIRETA COM FETCH (Ignora a trava de segurança do navegador)
-          const resposta = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}?select=*`, {
-            method: 'GET',
-            headers: {
-              'apikey': SUPABASE_SERVICE_KEY,
-              'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            }
-          });
+          const { data, error } = await sb.from(tabela).select('*');
           
-          if (!resposta.ok) {
-            const erroJson = await resposta.json();
-            logMsg(`ERRO na tabela ${tabela}: ${erroJson.message || resposta.statusText}`, '#dc2626');
-            backupData.tabelas[tabela] = { erro: erroJson };
+          if (error) {
+            logMsg(`ERRO na tabela ${tabela}: ${error.message}`, '#dc2626');
+            backupData.tabelas[tabela] = { erro: error.message };
             ocorreuErro = true;
           } else {
-            const data = await resposta.json();
             backupData.tabelas[tabela] = data;
             logMsg(`SUCESSO: ${data.length} registos encontrados em [${tabela}].`, '#16a34a');
           }
         }
 
-        logMsg('A compilar e formatar os dados extraídos...', '#fbbf24');
+        logMsg('A organizar ficheiro JSON...', '#fbbf24');
         const jsonString = JSON.stringify(backupData, null, 2);
         
         // Forçar Download Automático
         try {
-          logMsg('A tentar disparar o download automático...', '#60a5fa');
+          logMsg('A disparar download...', '#60a5fa');
           const blob = new Blob([jsonString], { type: "application/json" });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -121,17 +110,17 @@
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-          logMsg('Download disparado! Verifique a sua pasta de transferências.', '#16a34a');
+          logMsg('Download disparado! Verifique as suas transferências.', '#16a34a');
         } catch (downloadErr) {
-          logMsg('Navegador impediu o download. Veja o código abaixo.', '#dc2626');
+          logMsg('O navegador bloqueou o download.', '#dc2626');
         }
 
-        // Fallback Manual
+        // Mostra o texto sempre, por segurança
         document.getElementById('txtBackup').value = jsonString;
         document.getElementById('fallbackArea').style.display = 'block';
 
         if(ocorreuErro) {
-           logMsg('Backup concluído com alguns erros (veja acima).', '#fbbf24');
+           logMsg('Backup concluído, mas houve erros (verifique se o RLS está desativado nas tabelas).', '#fbbf24');
         } else {
            logMsg('PROCESSO DE BACKUP CONCLUÍDO COM SUCESSO TOTAL!', '#16a34a');
         }
@@ -149,7 +138,7 @@
       const txt = document.getElementById('txtBackup');
       txt.select();
       document.execCommand('copy');
-      alert('Código copiado! Cole num ficheiro de texto (.txt ou .json) e guarde no seu computador.');
+      alert('Código copiado! Cole num bloco de notas e grave com o final .json');
     }
   </script>
 
